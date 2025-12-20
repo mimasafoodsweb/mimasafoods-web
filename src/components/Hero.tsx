@@ -11,8 +11,8 @@ export default function Hero() {
   const images = Object.values(imageModules);
 
   // Animation config (horizontal). Increase image size by ~20%.
-  const imageHeight = 280; // increase for better visibility
-  const itemWidth = 300; // reduced width to bring images closer together and fit better
+  const imageHeight = 400; // increased for much better visibility
+  const itemWidth = 350; // adjusted width to accommodate larger images
   const rollWidth = itemWidth * images.length; // total translate distance
   const durationSeconds = Math.max(5, images.length * 1.5); // speed based on count
 
