@@ -137,7 +137,7 @@ export default function Cart({
 
             <button
               onClick={onCheckout}
-              className="w-full bg-[mimasa-primary] text-white font-bold py-4 rounded-full hover:bg-[mimasa-deep] transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="w-full bg-gradient-to-r from-mimasa-accent to-mimasa-primary text-white font-bold py-4 rounded-full hover:from-mimasa-primary hover:to-mimasa-accent transition-all duration-300 shadow-lg hover:shadow-xl border-2 border-mimasa-accent"
             >
               Proceed to Checkout
             </button>

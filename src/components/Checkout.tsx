@@ -194,7 +194,7 @@ export default function Checkout({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-6 py-4 bg-[mimasa-primary] text-white font-bold rounded-full hover:bg-[mimasa-deep] transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-mimasa-accent to-mimasa-primary text-white font-bold rounded-full hover:from-mimasa-primary hover:to-mimasa-accent transition-all shadow-lg hover:shadow-xl border-2 border-mimasa-accent disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Placing Order...' : 'Place Order'}
               </button>
