@@ -193,17 +193,17 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-mimasa-cream flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#FFAE01] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading products...</p>
+          <div className="w-16 h-16 border-4 border-mimasa-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-mimasa-deep text-lg font-medium">Loading products...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-mimasa-cream">
       <Header cartItemCount={cartItemCount} onCartClick={() => setIsCartOpen(true)} />
       <Hero />
       <ProductGrid products={products} onAddToCart={handleAddToCart} />
