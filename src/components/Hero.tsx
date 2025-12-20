@@ -11,20 +11,38 @@ export default function Hero() {
   const images = Object.values(imageModules);
 
   // Animation config (horizontal). Increase image size by ~20%.
-  const imageHeight = 400; // increased for much better visibility
-  const itemWidth = 350; // adjusted width to accommodate larger images
+  const imageHeight = 380; // optimized height for row layout
+  const itemWidth = 420; // increased width since we have full width available in row layout
   const rollWidth = itemWidth * images.length; // total translate distance
   const durationSeconds = Math.max(5, images.length * 1.5); // speed based on count
 
   return (
     <div className="bg-gradient-to-br from-mimasa-cream via-mimasa-warm/30 to-mimasa-sage/20 py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          {/* Left column: animated rolling product images */}
-          <div className="order-2 md:order-1 mr-10">
+        <div className="flex flex-col gap-12">
+          {/* Top row: hero content */}
+          <div className="text-center py-8">
+            <div className="flex items-center justify-center gap-4 mb-6 flex-wrap sm:flex-nowrap">
+              <h2 className="text-3xl font-serif font-semibold text-mimasa-deep whitespace-nowrap">
+                Homemade Delicacies
+              </h2>
+              <img src={ReadyCook} alt="Ready to Cook" className="h-16 w-auto" />
+              <img src={Wording} alt="Wording" className="h-10 w-auto" />
+              <img src={TenMin} alt="Ready in 10 Minutes" className="h-16 w-auto" />
+            </div>
+            <p className="text-xl text-mimasa-deep/80 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+              Authentic Homemade Indian Delicacies crafted into premium Ready-to-Cook Gravies, Curry Pastes & Marinades—bringing traditional flavours to your kitchen with effortless cooking.
+            </p>
+            <div className="inline-block bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-10 py-4 rounded-full font-serif font-semibold text-xl shadow-large hover:shadow-xl transition-all duration-300">
+              Free Delivery on Orders Above ₹500
+            </div>
+          </div>
+
+          {/* Bottom row: animated rolling product images */}
+          <div className="w-full">
             <div
-              className="relative overflow-hidden rounded-3xl shadow-large bg-white/70 backdrop-blur-sm border border-mimasa-warm/20 max-w-full"
-              style={{ height: imageHeight + 32 }}
+              className="relative overflow-hidden rounded-3xl shadow-large bg-white/70 backdrop-blur-sm border border-mimasa-warm/20 max-w-full mx-auto"
+              style={{ height: imageHeight + 32, maxWidth: '100%' }}
             >
               <div
                 className="w-full flex items-center"
@@ -43,24 +61,6 @@ export default function Hero() {
               <style>
                 {`@keyframes mf-scroll-x { 0% { transform: translateX(0); } 100% { transform: translateX(-${rollWidth}px); } }`}
               </style>
-            </div>
-          </div>
-
-          {/* Right column: existing hero content */}
-          <div className="text-center order-1 md:order-2">
-            <div className="flex items-center justify-center gap-4 mb-6 flex-wrap sm:flex-nowrap">
-              <h2 className="text-3xl font-serif font-semibold text-mimasa-deep whitespace-nowrap">
-                Homemade Delicacies
-              </h2>
-              <img src={ReadyCook} alt="Ready to Cook" className="h-16 w-auto" />
-              <img src={Wording} alt="Wording" className="h-10 w-auto" />
-              <img src={TenMin} alt="Ready in 10 Minutes" className="h-16 w-auto" />
-            </div>
-            <p className="text-xl text-mimasa-deep/80 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-              Authentic Homemade Indian Delicacies crafted into premium Ready-to-Cook Gravies, Curry Pastes & Marinades—bringing traditional flavours to your kitchen with effortless cooking.
-            </p>
-            <div className="inline-block bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-10 py-4 rounded-full font-serif font-semibold text-xl shadow-large hover:shadow-xl transition-all duration-300">
-              Free Delivery on Orders Above ₹500
             </div>
           </div>
         </div>
