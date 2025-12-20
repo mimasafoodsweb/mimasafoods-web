@@ -13,11 +13,11 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const resolvedImg = getProductImageUrl(product.name) || product.image_url;
   return (
     <div className="bg-white rounded-3xl shadow-soft hover:shadow-large transition-all duration-300 overflow-hidden group border border-mimasa-cream/50">
-      <div className="relative overflow-hidden h-72">
+      <div className="relative overflow-hidden h-56">
         <img
           src={resolvedImg}
           alt={product.name}
-          className="w-full h-full object-cover scale-110 group-hover:scale-115 transition-transform duration-500 cursor-pointer"
+          className="w-full h-full object-cover scale-125 group-hover:scale-130 transition-transform duration-500 cursor-pointer"
           onClick={() => setIsModalOpen(true)}
         />
         {product.category === 'marinade' && (
