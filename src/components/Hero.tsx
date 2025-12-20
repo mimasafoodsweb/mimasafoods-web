@@ -11,8 +11,8 @@ export default function Hero() {
   const images = Object.values(imageModules);
 
   // Animation config (horizontal). Increase image size by ~20%.
-  const imageHeight = 350; // increase for better visibility
-  const itemWidth = 360; // reduced width to bring images closer together
+  const imageHeight = 280; // increase for better visibility
+  const itemWidth = 300; // reduced width to bring images closer together and fit better
   const rollWidth = itemWidth * images.length; // total translate distance
   const durationSeconds = Math.max(5, images.length * 1.5); // speed based on count
 
@@ -21,8 +21,11 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-8 items-center">
           {/* Left column: animated rolling product images */}
-          <div className="order-2 md:order-1">
-            <div className="relative overflow-hidden rounded-3xl shadow-large bg-white/70 backdrop-blur-sm border border-mimasa-warm/20" style={{ height: imageHeight + 32 }}>
+          <div className="order-2 md:order-1 mr-10">
+            <div
+              className="relative overflow-hidden rounded-3xl shadow-large bg-white/70 backdrop-blur-sm border border-mimasa-warm/20 max-w-full"
+              style={{ height: imageHeight + 32 }}
+            >
               <div
                 className="w-full flex items-center"
                 style={{
