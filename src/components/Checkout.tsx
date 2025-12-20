@@ -65,7 +65,7 @@ export default function Checkout({
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <CreditCard className="w-6 h-6 text-[#FFAE01]" />
+              <CreditCard className="w-6 h-6 text-[mimasa-primary]" />
               <h2 className="text-2xl font-bold text-gray-900">Checkout</h2>
             </div>
             <button
@@ -94,7 +94,7 @@ export default function Checkout({
                 ))}
                 <div className="pt-2 border-t flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span className="text-[#FFAE01]">₹{totalAmount.toFixed(2)}</span>
+                  <span className="text-[mimasa-primary]">₹{totalAmount.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function Checkout({
                   value={formData.customer_name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#FFAE01] focus:ring-2 focus:ring-[#FFAE01] focus:ring-opacity-20 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[mimasa-primary] focus:ring-2 focus:ring-[mimasa-primary] focus:ring-opacity-20 outline-none transition-all"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -129,7 +129,7 @@ export default function Checkout({
                   value={formData.customer_email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#FFAE01] focus:ring-2 focus:ring-[#FFAE01] focus:ring-opacity-20 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[mimasa-primary] focus:ring-2 focus:ring-[mimasa-primary] focus:ring-opacity-20 outline-none transition-all"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -145,7 +145,7 @@ export default function Checkout({
                   onChange={handleChange}
                   required
                   pattern="[0-9]{10}"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#FFAE01] focus:ring-2 focus:ring-[#FFAE01] focus:ring-opacity-20 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[mimasa-primary] focus:ring-2 focus:ring-[mimasa-primary] focus:ring-opacity-20 outline-none transition-all"
                   placeholder="10-digit mobile number"
                 />
               </div>
@@ -160,7 +160,7 @@ export default function Checkout({
                   onChange={handleChange}
                   required
                   rows={3}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#FFAE01] focus:ring-2 focus:ring-[#FFAE01] focus:ring-opacity-20 outline-none transition-all resize-none"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[mimasa-primary] focus:ring-2 focus:ring-[mimasa-primary] focus:ring-opacity-20 outline-none transition-all resize-none"
                   placeholder="Complete delivery address"
                 />
               </div>
@@ -176,7 +176,7 @@ export default function Checkout({
                   onChange={handleChange}
                   required
                   pattern="[0-9]{6}"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#FFAE01] focus:ring-2 focus:ring-[#FFAE01] focus:ring-opacity-20 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[mimasa-primary] focus:ring-2 focus:ring-[mimasa-primary] focus:ring-opacity-20 outline-none transition-all"
                   placeholder="6-digit PIN code"
                 />
               </div>
@@ -194,7 +194,7 @@ export default function Checkout({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-6 py-4 bg-[#FFAE01] text-white font-bold rounded-full hover:bg-[#e69d00] transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-4 bg-[mimasa-primary] text-white font-bold rounded-full hover:bg-[mimasa-deep] transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Placing Order...' : 'Place Order'}
               </button>

@@ -38,7 +38,7 @@ export default function Cart({
       <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col">
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center space-x-2">
-            <ShoppingBag className="w-6 h-6 text-[#FFAE01]" />
+            <ShoppingBag className="w-6 h-6 text-[mimasa-primary]" />
             <h2 className="text-2xl font-bold text-gray-900">Your Cart</h2>
           </div>
           <button
@@ -56,7 +56,7 @@ export default function Cart({
               <p className="text-gray-500 text-lg">Your cart is empty</p>
               <button
                 onClick={onClose}
-                className="mt-4 text-[#FFAE01] hover:text-[#e69d00] font-semibold"
+                className="mt-4 text-[mimasa-primary] hover:text-[mimasa-deep] font-semibold"
               >
                 Continue Shopping
               </button>
@@ -78,7 +78,7 @@ export default function Cart({
                     <h3 className="font-semibold text-gray-900 mb-1">
                       {item.product?.name}
                     </h3>
-                    <p className="text-[#FFAE01] font-bold">
+                    <p className="text-[mimasa-primary] font-bold">
                       ₹{item.product?.price}
                     </p>
 
@@ -137,7 +137,7 @@ export default function Cart({
 
             <button
               onClick={onCheckout}
-              className="w-full bg-[#FFAE01] text-white font-bold py-4 rounded-full hover:bg-[#e69d00] transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="w-full bg-[mimasa-primary] text-white font-bold py-4 rounded-full hover:bg-[mimasa-deep] transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Proceed to Checkout
             </button>
