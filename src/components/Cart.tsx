@@ -69,7 +69,7 @@ export default function Cart({
                   className="flex gap-4 p-4 bg-gray-50 rounded-xl"
                 >
                   <img
-                    src={getProductImageUrl(item.product?.name || '') || item.product?.image_url}
+                    src={item.product?.name ? getProductImageUrl(item.product.name.toUpperCase()) || item.product?.image_url : item.product?.image_url}
                     alt={item.product?.name}
                     className="w-24 h-24 object-cover rounded-lg scale-105 transition-transform"
                   />

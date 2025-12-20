@@ -10,7 +10,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const resolvedImg = getProductImageUrl(product.name) || product.image_url;
+  const resolvedImg = getProductImageUrl(product.name.toUpperCase()) || product.image_url;
   return (
     <div className="bg-white rounded-3xl shadow-soft hover:shadow-large transition-all duration-300 overflow-hidden group border border-mimasa-cream/50">
       <div className="relative overflow-hidden h-56">

@@ -55,7 +55,7 @@ export default function Hero() {
               >
                 {[...images, ...images].map((src, idx) => (
                   <div key={idx} className="flex items-center justify-center" style={{ width: itemWidth, height: imageHeight + 32 }}>
-                    <img src={src} alt="Product" style={{ height: imageHeight + 80 }} className="object-contain drop-shadow-lg" />
+                    <img src={src} alt="Product" style={{ height: imageHeight + 120 }} className="object-contain drop-shadow-lg" />
                   </div>
                 ))}
               </div>

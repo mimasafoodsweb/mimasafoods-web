@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, CreditCard } from 'lucide-react';
 import { CartItem } from '../types';
+import { getProductImageUrl } from '../utils/images';
 
 interface CheckoutProps {
   isOpen: boolean;
@@ -81,17 +82,34 @@ export default function Checkout({
               <h3 className="text-lg font-bold text-gray-900 mb-4">
                 Order Summary
               </h3>
-              <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <span className="text-gray-600">
-                      {item.product?.name} × {item.quantity}
-                    </span>
-                    <span className="font-semibold text-gray-900">
-                      ₹{((item.product?.price || 0) * item.quantity).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
+              <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                {cartItems.map((item) => {
+                  const resolvedImg = item.product?.name ? getProductImageUrl(item.product.name.toUpperCase()) || item.product?.image_url : item.product?.image_url;
+                  return (
+                    <div key={item.id} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 flex-1">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                          <img
+                            src={resolvedImg}
+                            alt={item.product?.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-gray-900 font-medium text-sm">
+                            {item.product?.name}
+                          </span>
+                          <span className="text-gray-500 text-xs ml-2">
+                            × {item.quantity}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="font-semibold text-gray-900 text-sm">
+                        ₹{((item.product?.price || 0) * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  );
+                })}
                 <div className="pt-2 border-t flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span className="text-[mimasa-primary]">₹{totalAmount.toFixed(2)}</span>
