@@ -4,6 +4,7 @@ import { Product, CartItem } from './types';
 import { getSessionId } from './utils/session';
 import Header from './components/Header';
 import Hero from './components/Hero';
+import AboutUs from './components/AboutUs';
 import ProductGrid from './components/ProductGrid';
 import Cart from './components/Cart';
 import Checkout, { OrderData } from './components/Checkout';
@@ -206,6 +207,7 @@ function App() {
       <Header cartItemCount={cartItemCount} onCartClick={() => setIsCartOpen(true)} />
       <Hero />
       <ProductGrid products={products} onAddToCart={handleAddToCart} />
+      <AboutUs />
       <Footer />
 
       <Cart

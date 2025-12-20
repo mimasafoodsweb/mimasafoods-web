@@ -1,5 +1,6 @@
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { CartItem } from '../types';
+import { getProductImageUrl } from '../utils/images';
 
 interface CartProps {
   isOpen: boolean;
@@ -68,9 +69,9 @@ export default function Cart({
                   className="flex gap-4 p-4 bg-gray-50 rounded-xl"
                 >
                   <img
-                    src={item.product?.image_url}
+                    src={getProductImageUrl(item.product?.name || '') || item.product?.image_url}
                     alt={item.product?.name}
-                    className="w-20 h-20 object-cover rounded-lg"
+                    className="w-24 h-24 object-cover rounded-lg scale-105 transition-transform"
                   />
 
                   <div className="flex-1">

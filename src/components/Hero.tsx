@@ -1,20 +1,64 @@
+import ReadyCook from '../assets/ready-cook.png';
+import Wording from '../assets/wording.png';
+import TenMin from '../assets/10-min-text.png';
+
 export default function Hero() {
+  // Load all product images from assets
+  const imageModules = import.meta.glob('../assets/product_images/*.{png,PNG,jpg,JPG,jpeg,JPEG,webp,WEBP}', {
+    eager: true,
+    as: 'url',
+  }) as Record<string, string>;
+  const images = Object.values(imageModules);
+
+  // Animation config (horizontal). Increase image size by ~20%.
+  const imageHeight = 350; // increase for better visibility
+  const itemWidth = 430; // widen tiles to match larger images
+  const rollWidth = itemWidth * images.length; // total translate distance
+  const durationSeconds = Math.max(5, images.length * 1.5); // speed based on count
+
   return (
-    <div className="bg-gradient-to-r from-[#FAF2E7] to-[#FFE8CC] py-20">
+    <div className="bg-gradient-to-r from-[#FAF2E7] to-[#FFE8CC] py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-5xl font-bold text-gray-900 mb-4">
-            Homemade Delicacy
-          </h2>
-          <p className="text-2xl text-gray-700 mb-6">
-            Best Ready to Cook Gravy & Curry Paste
-          </p>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-            Experience authentic Indian flavors in just 5 minutes.
-            Our ready-to-cook gravies bring restaurant-quality taste to your home kitchen.
-          </p>
-          <div className="inline-block bg-[#FFAE01] text-white px-8 py-3 rounded-full font-semibold text-lg">
-            Free Delivery on Orders Above ₹500
+        <div className="grid md:grid-cols-2 gap-10 items-center">
+          {/* Left column: animated rolling product images */}
+          <div className="order-2 md:order-1">
+            <div className="relative overflow-hidden rounded-2xl shadow-lg bg-white/60" style={{ height: imageHeight + 32 }}>
+              <div
+                className="w-full flex items-center"
+                style={{
+                  width: rollWidth * 2, // space for duplicated sequence
+                  animation: images.length > 0 ? `mf-scroll-x ${durationSeconds}s linear infinite` : 'none',
+                }}
+              >
+                {[...images, ...images].map((src, idx) => (
+                  <div key={idx} className="flex items-center justify-center" style={{ width: itemWidth, height: imageHeight + 32 }}>
+                    <img src={src} alt="Product" style={{ height: imageHeight }} className="object-contain drop-shadow-md" />
+                  </div>
+                ))}
+              </div>
+              {/* Keyframes for the horizontal rolling animation */}
+              <style>
+                {`@keyframes mf-scroll-x { 0% { transform: translateX(0); } 100% { transform: translateX(-${rollWidth}px); } }`}
+              </style>
+            </div>
+          </div>
+
+          {/* Right column: existing hero content */}
+          <div className="text-center order-1 md:order-2">
+            <div className="flex items-center justify-center gap-3 mb-2 flex-wrap sm:flex-nowrap">
+              <h2 className="text-2xl font-bold text-gray-900 whitespace-nowrap">
+                Homemade Delicacies
+              </h2>
+              <img src={ReadyCook} alt="Ready to Cook" className="h-14 w-auto" />
+              <img src={Wording} alt="Wording" className="h-8 w-auto" />
+              <img src={TenMin} alt="Ready in 10 Minutes" className="h-14 w-auto" />
+            </div>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+              Authentic Homemade Indian Delicacies crafted into premium Ready-to-Cook Gravies, Curry Pastes & Marinades—bringing traditional flavours to your kitchen with effortless cooking.
+            </p>
+            <div className="inline-block bg-[#FFAE01] text-white px-8 py-3 rounded-full font-semibold text-lg">
+              Free Delivery on Orders Above ₹500
+            </div>
           </div>
         </div>
       </div>

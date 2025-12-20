@@ -1,4 +1,5 @@
 import { ShoppingCart } from 'lucide-react';
+import Logo from '../assets/MimasaLogo.png';
 
 interface HeaderProps {
   cartItemCount: number;
@@ -11,8 +12,9 @@ export default function Header({ cartItemCount, onCartClick }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
+            <img src={Logo} alt="Mimasa Foods Pvt. Ltd. logo" className="h-20 w-auto mr-3" />
             <h1 className="text-3xl font-bold text-gray-900">
-              Mimasa Foods
+              Mimasa Foods Pvt. Ltd.
             </h1>
           </div>
 
@@ -21,7 +23,7 @@ export default function Header({ cartItemCount, onCartClick }: HeaderProps) {
               Products
             </a>
             <a href="#about" className="text-gray-700 hover:text-[#FFAE01] transition-colors">
-              About
+              About Us
             </a>
             <a href="#contact" className="text-gray-700 hover:text-[#FFAE01] transition-colors">
               Contact
