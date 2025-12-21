@@ -127,6 +127,12 @@ CREATE POLICY "Anyone can view active products"
   ON products FOR SELECT
   USING (is_active = true);
 
+-- RLS Policies for products management (allow all operations for admin)
+CREATE POLICY "Allow all operations on products"
+  ON products FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
 -- RLS Policies for cart_items (public access for shopping)
 CREATE POLICY "Anyone can view cart items"
   ON cart_items FOR SELECT

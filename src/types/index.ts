@@ -29,6 +29,7 @@ export interface Order {
   pin_code: string;
   total_amount: number;
   status: string;
+  created_at?: string;
 }
 
 export interface OrderItem {

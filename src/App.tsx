@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { Product, CartItem } from './types';
 import { getSessionId } from './utils/session';
@@ -10,6 +11,7 @@ import Cart from './components/Cart';
 import Checkout, { OrderData } from './components/Checkout';
 import OrderSuccess from './components/OrderSuccess';
 import Footer from './components/Footer';
+import AdminPanel from './components/AdminPanel';
 
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -203,36 +205,46 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-mimasa-cream">
-      <Header cartItemCount={cartItemCount} onCartClick={() => setIsCartOpen(true)} />
-      <Hero />
-      <ProductGrid products={products} onAddToCart={handleAddToCart} />
-      <AboutUs />
-      <Footer />
+    <Router>
+      <Routes>
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route
+          path="/*"
+          element={
+            <div className="min-h-screen bg-mimasa-cream">
+              <Header cartItemCount={cartItemCount} onCartClick={() => setIsCartOpen(true)} />
+              <Hero />
+              <ProductGrid products={products} onAddToCart={handleAddToCart} />
+              <AboutUs />
+              <Footer />
 
-      <Cart
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cartItems={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
-        onCheckout={handleCheckout}
-      />
+              <Cart
+                isOpen={isCartOpen}
+                onClose={() => setIsCartOpen(false)}
+                cartItems={cartItems}
+                onUpdateQuantity={handleUpdateQuantity}
+                onRemoveItem={handleRemoveItem}
+                onCheckout={handleCheckout}
+              />
 
-      <Checkout
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        cartItems={cartItems}
-        onSubmitOrder={handleSubmitOrder}
-        isSubmitting={isSubmitting}
-      />
+              <Checkout
+                isOpen={isCheckoutOpen}
+                onClose={() => setIsCheckoutOpen(false)}
+                cartItems={cartItems}
+                onSubmitOrder={handleSubmitOrder}
+                isSubmitting={isSubmitting}
+              />
 
-      <OrderSuccess
-        isOpen={isOrderSuccessOpen}
-        orderNumber={orderNumber}
-        onClose={handleCloseOrderSuccess}
-      />
-    </div>
+              <OrderSuccess
+                isOpen={isOrderSuccessOpen}
+                orderNumber={orderNumber}
+                onClose={handleCloseOrderSuccess}
+              />
+            </div>
+          }
+        />
+      </Routes>
+    </Router>
   );
 }
 

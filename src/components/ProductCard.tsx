@@ -27,16 +27,16 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         )}
       </div>
 
-      <div className="px-6 pt-4 pb-6">
-        <h3 className="text-xl font-serif font-semibold text-mimasa-deep mb-2 line-clamp-2 min-h-[3.5rem] leading-tight">
+      <div className="px-6 pt-3 pb-3">
+        <h3 className="text-xl font-serif font-semibold text-mimasa-deep mb-1 line-clamp-2 min-h-[3.5rem] leading-tight">
           {product.name}
         </h3>
 
-        <p className="text-mimasa-deep/70 text-sm mb-3 line-clamp-2 min-h-[2.5rem] leading-relaxed">
-          {product.description}
+        <p className="text-mimasa-deep/70 text-sm mb-1 line-clamp-2 min-h-[2.5rem] leading-relaxed">
+          {product.category}
         </p>
 
-        <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center justify-between">
           <div>
             <span className="text-2xl font-serif font-bold text-mimasa-primary">₹{product.price}</span>
             <span className="text-mimasa-deep/60 text-sm ml-2 font-medium">{product.weight}</span>
