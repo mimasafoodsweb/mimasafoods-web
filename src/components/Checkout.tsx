@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { X, CreditCard } from 'lucide-react';
+import { X, CreditCard, Loader2 } from 'lucide-react';
 import { CartItem } from '../types';
 import { getProductImageUrl } from '../utils/images';
+import { createRazorpayOrder, verifyPayment, saveOrder } from '../utils/api';
+import { PaymentVerificationData } from '../utils/razorpay';
 
 interface CheckoutProps {
   isOpen: boolean;
   onClose: () => void;
   cartItems: CartItem[];
-  onSubmitOrder: (orderData: OrderData) => void;
   isSubmitting: boolean;
+  onPaymentSuccess: (orderNumber: string) => void;
 }
 
 export interface OrderData {
@@ -23,8 +25,8 @@ export default function Checkout({
   isOpen,
   onClose,
   cartItems,
-  onSubmitOrder,
   isSubmitting,
+  onPaymentSuccess,
 }: CheckoutProps) {
   const [formData, setFormData] = useState<OrderData>({
     customer_name: '',
@@ -34,14 +36,127 @@ export default function Checkout({
     pin_code: '',
   });
 
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
   const totalAmount = cartItems.reduce(
     (sum, item) => sum + (item.product?.price || 0) * item.quantity,
     0
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmitOrder(formData);
+    setPaymentError(null);
+    
+    try {
+      setIsProcessingPayment(true);
+      
+      // Step 1: Customer proceeds to pay
+      // Step 2: Create Razorpay order
+      const receipt = `order_${Date.now()}`;
+      const orderRequest = {
+        amount: totalAmount,
+        currency: 'INR',
+        receipt,
+        notes: {
+          customer_name: formData.customer_name,
+          customer_email: formData.customer_email,
+          customer_phone: formData.customer_phone,
+          shipping_address: formData.shipping_address,
+          pin_code: formData.pin_code,
+        }
+      };
+      
+      const orderResponse = await createRazorpayOrder(orderRequest);
+      
+      if (!orderResponse.success || !orderResponse.data) {
+        throw new Error(orderResponse.error || 'Failed to create payment order');
+      }
+      
+      // Step 3: Order ID returned
+      const razorpayOrderId = orderResponse.data.id;
+      
+      // Step 4-5: Open Razorpay checkout and handle payment
+      await initiateRazorpayPayment(razorpayOrderId, totalAmount, formData, receipt);
+      
+    } catch (error) {
+      console.error('Payment error:', error);
+      setPaymentError(error instanceof Error ? error.message : 'Payment failed');
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+  
+  const initiateRazorpayPayment = (
+    orderId: string,
+    amount: number,
+    customerData: OrderData,
+    receipt: string
+  ): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_XXXXXXXXXXXXXXXX',
+        amount: amount * 100, // Convert to paise
+        currency: 'INR',
+        name: 'Mimasa Foods',
+        description: 'Order Payment',
+        order_id: orderId,
+        prefill: {
+          name: customerData.customer_name,
+          email: customerData.customer_email,
+          contact: customerData.customer_phone
+        },
+        notes: {
+          shipping_address: customerData.shipping_address,
+          pin_code: customerData.pin_code
+        },
+        theme: {
+          color: '#e74c3c'
+        },
+        modal: {
+          ondismiss: () => {
+            reject(new Error('Payment cancelled by user'));
+          }
+        },
+        handler: async (response: PaymentVerificationData) => {
+          try {
+            // Step 6: Verify payment signature
+            const verificationResult = await verifyPayment(response);
+            
+            if (!verificationResult.success || !verificationResult.verified) {
+              throw new Error(verificationResult.error || 'Payment verification failed');
+            }
+            
+            // Save order details after successful payment
+            const orderData = {
+              ...customerData,
+              order_id: orderId,
+              payment_id: response.razorpay_payment_id,
+              amount,
+              items: cartItems,
+              created_at: new Date().toISOString()
+            };
+            
+            const saveResult = await saveOrder(orderData);
+            
+            if (!saveResult.success) {
+              throw new Error(saveResult.error || 'Failed to save order');
+            }
+            
+            // Payment successful - call success callback
+            onPaymentSuccess(receipt);
+            resolve();
+            
+          } catch (error) {
+            console.error('Payment processing error:', error);
+            reject(error);
+          }
+        }
+      };
+      
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+    });
   };
 
   const handleChange = (
@@ -211,12 +326,27 @@ export default function Checkout({
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-mimasa-accent to-mimasa-primary text-white font-bold rounded-full hover:from-mimasa-primary hover:to-mimasa-accent transition-all shadow-lg hover:shadow-xl border-2 border-mimasa-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting || isProcessingPayment}
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-mimasa-accent to-mimasa-primary text-white font-bold rounded-full hover:from-mimasa-primary hover:to-mimasa-accent transition-all shadow-lg hover:shadow-xl border-2 border-mimasa-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                {isSubmitting ? 'Placing Order...' : 'Place Order'}
+                {isProcessingPayment ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Processing Payment...
+                  </>
+                ) : isSubmitting ? (
+                  'Placing Order...'
+                ) : (
+                  'Pay with Razorpay'
+                )}
               </button>
             </div>
+            
+            {paymentError && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600 text-sm font-medium">{paymentError}</p>
+              </div>
+            )}
           </form>
         </div>
       </div>

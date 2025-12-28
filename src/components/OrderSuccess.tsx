@@ -1,15 +1,21 @@
-import { CheckCircle, Package } from 'lucide-react';
+import { CheckCircle, Package, CreditCard, Calendar } from 'lucide-react';
 
 interface OrderSuccessProps {
   isOpen: boolean;
   orderNumber: string;
   onClose: () => void;
+  paymentId?: string;
+  amount?: number;
+  paymentDate?: string;
 }
 
 export default function OrderSuccess({
   isOpen,
   orderNumber,
   onClose,
+  paymentId,
+  amount,
+  paymentDate,
 }: OrderSuccessProps) {
   if (!isOpen) return null;
 
@@ -34,6 +40,31 @@ export default function OrderSuccess({
             </div>
             <p className="text-2xl font-bold text-[mimasa-primary]">{orderNumber}</p>
           </div>
+
+          {paymentId && (
+            <div className="bg-blue-50 rounded-xl p-4 mb-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-center space-x-2">
+                  <CreditCard className="w-5 h-5 text-blue-600" />
+                  <span className="text-gray-600 font-medium">Payment Details</span>
+                </div>
+                {amount && (
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Amount Paid:</span> ₹{amount.toFixed(2)}
+                  </div>
+                )}
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Payment ID:</span> {paymentId}
+                </div>
+                {paymentDate && (
+                  <div className="flex items-center justify-center space-x-1 text-sm text-gray-600">
+                    <Calendar className="w-4 h-4" />
+                    <span className="font-medium">Paid on:</span> {new Date(paymentDate).toLocaleString()}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <p className="text-gray-600 mb-8">
             Thank you for your order! We'll send a confirmation email shortly

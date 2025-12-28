@@ -7,4 +7,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  base: '/mimasafoods-web/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+  },
 });
