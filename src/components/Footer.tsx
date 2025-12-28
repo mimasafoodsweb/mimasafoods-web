@@ -13,10 +13,13 @@ export default function Footer() {
           <div id="about">
             <h4 className="text-xl font-serif font-semibold mb-6 text-mimasa-warm">Contact Us</h4>
             <div className="space-y-3 text-mimasa-cream">
-              <p>201, Callisto Apt., JM Road</p>
-              <p>Pune-411004, Maharashtra, India</p>
+              <p>Mimasa Foods Pvt Ltd</p>
+              <p>Plot no 3, Kshitij,</p>
+              <p>Sanjwat CHS,669/2,</p>
+              <p>Bibwewadi,</p>
+              <p>Pune Maharashtra -411037</p>
               <p>Email: mimasafoods@gmail.com</p>
-              <p>Phone: +91 7709794918</p>
+              <p>Phone: +91 8421794918</p>
             </div>
           </div>
 
