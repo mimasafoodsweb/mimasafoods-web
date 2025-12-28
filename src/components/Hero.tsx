@@ -72,13 +72,13 @@ export default function Hero() {
           <div className="w-full overflow-hidden bg-gradient-to-r from-mimasa-primary/10 to-mimasa-secondary/10 rounded-2xl py-3 border border-mimasa-warm/30">
             <div className="flex animate-marquee whitespace-nowrap">
               <span className="text-lg font-semibold text-mimasa-deep mx-4">
-                Our USP are - The wet gravies retain authentic taste and aroma. No added preservatives. Affordable prices and available at leading retailers.
+                Our USP are - The wet gravies retain authentic taste and aroma. No artificial flavors and colors. Affordable prices and available at leading retailers.
               </span>
               <span className="text-lg font-semibold text-mimasa-deep mx-4">
-                Our USP are - The wet gravies retain authentic taste and aroma. No added preservatives. Affordable prices and available at leading retailers.
+                Our USP are - The wet gravies retain authentic taste and aroma. No artificial flavors and colors. Affordable prices and available at leading retailers.
               </span>
               <span className="text-lg font-semibold text-mimasa-deep mx-4">
-                Our USP are - The wet gravies retain authentic taste and aroma. No added preservatives. Affordable prices and available at leading retailers.
+                Our USP are - The wet gravies retain authentic taste and aroma. No artificial flavors and colors. Affordable prices and available at leading retailers.
               </span>
             </div>
           </div>

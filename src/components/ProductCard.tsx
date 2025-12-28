@@ -43,8 +43,8 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
           </div>
 
           <button
-            onClick={() => onAddToCart(product)}
-            className="bg-gradient-to-r from-mimasa-primary to-mimasa-deep text-white font-semibold px-5 py-2.5 rounded-full hover:from-mimasa-deep hover:to-mimasa-primary transition-all duration-300 flex items-center space-x-2 shadow-medium hover:shadow-large text-sm"
+            disabled
+            className="bg-gray-400 text-white font-semibold px-5 py-2.5 rounded-full cursor-not-allowed opacity-60 flex items-center space-x-2 shadow-medium text-sm"
           >
             <span>Add</span>
             <ShoppingCart className="w-4 h-4" />
@@ -80,11 +80,8 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
                     <span className="text-mimasa-deep/60 text-base ml-3 font-medium">{product.weight}</span>
                   </div>
                   <button
-                    onClick={() => {
-                      onAddToCart(product);
-                      setIsModalOpen(false);
-                    }}
-                    className="bg-gradient-to-r from-mimasa-primary to-mimasa-deep text-white font-semibold px-6 py-3 rounded-full hover:from-mimasa-deep hover:to-mimasa-primary transition-all duration-300 flex items-center space-x-2 text-base shadow-medium hover:shadow-large"
+                    disabled
+                    className="bg-gray-400 text-white font-semibold px-6 py-3 rounded-full cursor-not-allowed opacity-60 flex items-center space-x-2 text-base shadow-medium"
                   >
                     <span>Add</span>
                     <ShoppingCart className="w-5 h-5" />
