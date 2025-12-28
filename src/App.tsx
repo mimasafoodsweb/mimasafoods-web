@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { supabase } from './lib/supabase';
+import { supabase, isDemoMode, demoProducts } from './lib/supabase';
 import { Product, CartItem } from './types';
 import { getSessionId } from './utils/session';
 import Header from './components/Header';
@@ -32,7 +32,12 @@ function App() {
 
   const fetchProducts = async () => {
     try {
-      const { data, error } = await supabase
+      if (isDemoMode) {
+        setProducts(demoProducts);
+        return;
+      }
+      
+      const { data, error } = await supabase!
         .from('products')
         .select('*')
         .eq('is_active', true)
@@ -42,6 +47,8 @@ function App() {
       setProducts(data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      // Fallback to demo products on error
+      setProducts(demoProducts);
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +56,12 @@ function App() {
 
   const fetchCartItems = async () => {
     try {
-      const { data, error } = await supabase
+      if (isDemoMode) {
+        setCartItems([]);
+        return;
+      }
+      
+      const { data, error } = await supabase!
         .from('cart_items')
         .select('*, product:products(*)')
         .eq('session_id', sessionId);
@@ -58,11 +70,17 @@ function App() {
       setCartItems(data || []);
     } catch (error) {
       console.error('Error fetching cart:', error);
+      setCartItems([]);
     }
   };
 
   const handleAddToCart = async (product: Product) => {
     try {
+      if (isDemoMode) {
+        alert('Demo mode: Cart functionality is not available. This is a static demo.');
+        return;
+      }
+      
       const existingItem = cartItems.find(
         (item) => item.product_id === product.id
       );
@@ -70,7 +88,7 @@ function App() {
       if (existingItem) {
         await handleUpdateQuantity(existingItem.id, existingItem.quantity + 1);
       } else {
-        const { data, error } = await supabase
+        const { data, error } = await supabase!
           .from('cart_items')
           .insert({
             session_id: sessionId,
@@ -87,12 +105,15 @@ function App() {
       setIsCartOpen(true);
     } catch (error) {
       console.error('Error adding to cart:', error);
+      alert('Error adding to cart. Please try again.');
     }
   };
 
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
     try {
-      const { error } = await supabase
+      if (isDemoMode) return;
+      
+      const { error } = await supabase!
         .from('cart_items')
         .update({ quantity: newQuantity })
         .eq('id', itemId);
@@ -111,7 +132,9 @@ function App() {
 
   const handleRemoveItem = async (itemId: string) => {
     try {
-      const { error } = await supabase
+      if (isDemoMode) return;
+      
+      const { error } = await supabase!
         .from('cart_items')
         .delete()
         .eq('id', itemId);
@@ -131,6 +154,11 @@ function App() {
   const handleSubmitOrder = async (orderData: OrderData) => {
     setIsSubmitting(true);
     try {
+      if (isDemoMode) {
+        alert('Demo mode: Order functionality is not available. This is a static demo.');
+        return;
+      }
+      
       const totalAmount = cartItems.reduce(
         (sum, item) => sum + (item.product?.price || 0) * item.quantity,
         0
@@ -138,7 +166,7 @@ function App() {
 
       const generatedOrderNumber = `MF${Date.now()}`;
 
-      const { data: order, error: orderError } = await supabase
+      const { data: order, error: orderError } = await supabase!
         .from('orders')
         .insert({
           order_number: generatedOrderNumber,
@@ -160,14 +188,14 @@ function App() {
         subtotal: (item.product?.price || 0) * item.quantity,
       }));
 
-      const { error: itemsError } = await supabase
+      const { error: itemsError } = await supabase!
         .from('order_items')
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
 
       const cartItemIds = cartItems.map((item) => item.id);
-      const { error: clearCartError } = await supabase
+      const { error: clearCartError } = await supabase!
         .from('cart_items')
         .delete()
         .in('id', cartItemIds);
