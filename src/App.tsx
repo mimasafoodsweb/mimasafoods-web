@@ -8,7 +8,7 @@ import Hero from './components/Hero';
 import AboutUs from './components/AboutUs';
 import ProductGrid from './components/ProductGrid';
 import Cart from './components/Cart';
-import Checkout, { OrderData } from './components/Checkout';
+import Checkout from './components/Checkout';
 import OrderSuccess from './components/OrderSuccess';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';

@@ -9,22 +9,22 @@
       // MIT License
       // https://github.com/rafgraph/spa-github-pages
       // This script takes the current url and converts the path and query
-      // string into just a query string, and then redirects to the index.html
+      // string into just a query string, and then redirects to index.html
       // page with that query string. The path is needed to properly load
       // the page when the user refreshes the site or navigates directly.
       (function(l) {
         if (l.search[1] === '/' ) {
           var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
+                return s.replace(/~and~/g, '&')
+              }).join('?');
+              window.history.replaceState(null, null,
+                  l.pathname.slice(0, -1) + decoded + l.hash
+              );
         }
       }(window.location))
     </script>
     <meta name="description" content="Homemade delicacy - Best ready to cook gravy and curry paste. Authentic Indian flavors in just 5 minutes. Free delivery on orders above ₹500." />
-    <link rel="icon" type="image/png" href="/src/assets/MimasaLogo.png" />
+    <link rel="icon" type="image/jpeg" href="/MimasaLogo.jpg" />
   </head>
   <body>
     <div id="root"></div>
