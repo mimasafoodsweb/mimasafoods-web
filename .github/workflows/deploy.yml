@@ -30,20 +30,6 @@ jobs:
         echo "VITE_RAZORPAY_KEY_ID=${{ secrets.VITE_RAZORPAY_KEY_ID }}" >> .env
         echo "VITE_BREVO_API_KEY=${{ secrets.VITE_BREVO_API_KEY }}" >> .env
         
-    - name: Replace environment variables in HTML
-      run: |
-        sed -i "s|%VITE_BREVO_API_KEY%|${{ secrets.VITE_BREVO_API_KEY }}|g" index.html
-        
-    - name: Verify environment variables
-      run: |
-        echo "=== Environment Variables Verification ==="
-        echo "VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:0:20}..."
-        echo "VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:0:20}..."
-        echo "VITE_RAZORPAY_KEY_ID: ${VITE_RAZORPAY_KEY_ID:0:20}..."
-        echo "VITE_BREVO_API_KEY: ${VITE_BREVO_API_KEY:0:20}..."
-        echo "HTML replacement check:"
-        grep -o "window.__BREVO_API_KEY__ = '[^']*'" index.html || echo "Not found"
-        
     - name: Build
       run: npm run build
       env:

@@ -23,22 +23,13 @@ export class EmailService {
   private bccEmail: string = 'mimasafoods@gmail.com';
 
   private constructor() {
-    // Try to get API key from environment variables
     this.apiKey = import.meta.env.VITE_BREVO_API_KEY || '';
-    
     console.log('BREVO API Key from env:', import.meta.env.VITE_BREVO_API_KEY ? 'Found' : 'Not found');
     console.log('Available VITE env vars:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
-    
-    // Fallback for production - check if API key is hardcoded in build
-    if (!this.apiKey && typeof window !== 'undefined' && (window as any).__BREVO_API_KEY__) {
-      this.apiKey = (window as any).__BREVO_API_KEY__;
-      console.log('BREVO API Key from window fallback:', 'Found');
-    }
     
     if (!this.apiKey) {
       console.warn('BREVO API key not found in environment variables');
       console.warn('Please add VITE_BREVO_API_KEY to your .env.local file');
-      console.warn('For GitHub Pages, ensure the secret is properly configured in deployment workflow');
     } else {
       console.log('🔑 BREVO API Key loaded (first 10 chars):', this.apiKey.substring(0, 10) + '...');
     }
