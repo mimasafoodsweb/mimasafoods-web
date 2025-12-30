@@ -131,7 +131,7 @@ export async function saveOrder(orderData: any & { sessionId?: string }): Promis
       (sum: number, item: any) => sum + (item.product?.price || 0) * item.quantity,
       0
     );
-    const shippingCharge = subtotal < 500 ? 5 : 0;
+    const shippingCharge = subtotal < 500 ? 70 : 0;
     const totalAmount = subtotal + shippingCharge;
 
     // Generate order number
