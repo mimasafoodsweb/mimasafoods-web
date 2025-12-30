@@ -27,8 +27,11 @@ export interface Order {
   customer_phone: string;
   shipping_address: string;
   pin_code: string;
+  subtotal?: number;
+  shipping_charge?: number;
   total_amount: number;
   status: string;
+  payment_status?: string;
   created_at?: string;
 }
 

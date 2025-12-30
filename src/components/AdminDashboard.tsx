@@ -1,8 +1,9 @@
 import ManageProductDialog from './ManageProductDialog';
 import { useState, useEffect } from 'react';
-import { Package, ShoppingCart, BarChart3, LogOut, Menu, X, Edit, Power, PowerOff, Plus, Eye } from 'lucide-react';
+import { Package, ShoppingCart, BarChart3, LogOut, Menu, X, Edit, Power, PowerOff, Plus, Eye, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Product, Order, OrderItem } from '../types';
+import { InvoiceGenerator } from '../utils/invoiceGenerator';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -12,15 +13,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [activeMenu, setActiveMenu] = useState('products');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(undefined);
-  const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [currentOrderPage, setCurrentOrderPage] = useState(1);
+  const [orderPageSize, setOrderPageSize] = useState(10);
 
   useEffect(() => {
     if (activeMenu === 'products') {
@@ -33,6 +36,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   useEffect(() => {
     setCurrentPage(1);
   }, [pageSize]);
+
+  useEffect(() => {
+    setCurrentOrderPage(1);
+  }, [orderPageSize]);
 
   const fetchProducts = async () => {
     try {
@@ -90,11 +97,105 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setIsOrderModalOpen(true);
   };
 
+  const handleDownloadInvoice = async (order: Order) => {
+    try {
+      console.log('🔄 Starting download for order:', order.order_number);
+      
+      // Always fetch fresh order items for this specific order
+      const { data: items, error } = await supabase
+        .from('order_items')
+        .select(`
+          *,
+          product:products(*)
+        `)
+        .eq('order_id', order.id!);
+
+      if (error) throw error;
+      
+      const currentOrderItems = items || [];
+      console.log('📦 Fetched order items:', currentOrderItems.length);
+      
+      // Calculate subtotal from order items
+      const calculatedSubtotal = currentOrderItems.reduce((sum, item) => sum + item.subtotal, 0);
+      const shippingCharge = order.shipping_charge || 0;
+      
+      console.log('💰 Calculated amounts:', {
+        subtotal: calculatedSubtotal,
+        shipping: shippingCharge,
+        total: order.total_amount
+      });
+      
+      // Convert order to OrderEmailData format for InvoiceGenerator
+      const orderEmailData = {
+        orderNumber: order.order_number,
+        customerName: order.customer_name,
+        customerEmail: order.customer_email,
+        customerPhone: order.customer_phone,
+        shippingAddress: order.shipping_address,
+        pinCode: order.pin_code,
+        orderDate: order.created_at || new Date().toISOString(),
+        paymentId: order.id || '',
+        subtotal: order.subtotal || calculatedSubtotal,
+        shippingCharge: shippingCharge,
+        totalAmount: order.total_amount,
+        items: currentOrderItems.map(item => ({
+          id: item.order_id + '_' + item.product_id, // Create a unique ID
+          session_id: '', // Not needed for invoice
+          product_id: item.product_id,
+          quantity: item.quantity,
+          product: {
+            id: item.product_id,
+            name: item.product_name,
+            description: '',
+            price: item.product_price,
+            image_url: '',
+            category: '',
+            weight: '',
+            stock_quantity: 0,
+            is_active: true
+          }
+        }))
+      };
+
+      console.log('📄 Generating PDF with items:', orderEmailData.items.length);
+      const invoiceGenerator = InvoiceGenerator.getInstance();
+      const pdfBase64 = await invoiceGenerator.generateInvoicePDF(orderEmailData);
+      const invoiceFilename = invoiceGenerator.generateInvoiceFilename(order.order_number);
+      
+      // Convert base64 to blob and download
+      const binaryString = atob(pdfBase64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = invoiceFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log(`✅ Invoice downloaded: ${invoiceFilename}`);
+    } catch (error) {
+      console.error('❌ Error downloading invoice:', error);
+    }
+  };
+
   // Pagination calculations
   const totalPages = Math.ceil(products.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   const paginatedProducts = products.slice(startIndex, endIndex);
+
+  // Order pagination calculations
+  const totalOrderPages = Math.ceil(orders.length / orderPageSize);
+  const orderStartIndex = (currentOrderPage - 1) * orderPageSize;
+  const orderEndIndex = orderStartIndex + orderPageSize;
+  const paginatedOrders = orders.slice(orderStartIndex, orderEndIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -102,6 +203,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
+  };
+
+  const handleOrderPageChange = (page: number) => {
+    setCurrentOrderPage(page);
+  };
+
+  const handleOrderPageSizeChange = (newPageSize: number) => {
+    setOrderPageSize(newPageSize);
   };
 
   const handleToggleProductStatus = async (productId: string, currentStatus: boolean) => {
@@ -300,8 +409,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             ) : (
               <div className="bg-white shadow-md rounded-lg overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">Recent Orders</h3>
-                  <p className="text-sm text-gray-600">Manage customer orders and view details</p>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">Recent Orders</h3>
+                      <p className="text-sm text-gray-600">Manage customer orders and view details</p>
+                    </div>
+                    {orders.length > 0 && (
+                      <div className="text-sm text-gray-600">
+                        Showing {orderStartIndex + 1} to {Math.min(orderEndIndex, orders.length)} of {orders.length} orders
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -309,16 +427,16 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Status</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {orders.map((order) => (
+                      {paginatedOrders.map((order) => (
                         <tr key={order.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <button
@@ -328,14 +446,27 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               {order.order_number}
                             </button>
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {new Date(order.created_at || '').toLocaleDateString()}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">{order.customer_name}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{order.customer_email}</div>
-                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             ₹{order.total_amount}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              order.payment_status === 'paid'
+                                ? 'bg-green-100 text-green-800'
+                                : order.payment_status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : order.payment_status === 'failed'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {order.payment_status || 'pending'}
+                            </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -352,23 +483,69 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               {order.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {new Date(order.created_at || '').toLocaleDateString()}
-                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button
-                              onClick={() => handleViewOrder(order)}
-                              className="text-blue-600 hover:text-blue-900 transition flex items-center gap-1"
-                              title="View Order Details"
-                            >
-                              <Eye size={16} />
-                              View
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleViewOrder(order)}
+                                className="text-blue-600 hover:text-blue-900 transition"
+                                title="View Order Details"
+                              >
+                                <Eye size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDownloadInvoice(order)}
+                                className="text-green-600 hover:text-green-900 transition"
+                                title="Download Invoice"
+                              >
+                                <Download size={16} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
+
+                  {/* Order Pagination Controls */}
+                  {orders.length > 0 && (
+                    <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-700">Show</span>
+                        <select
+                          value={orderPageSize}
+                          onChange={(e) => handleOrderPageSizeChange(Number(e.target.value))}
+                          className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-mimasa-primary"
+                        >
+                          <option value={10}>10</option>
+                          <option value={20}>20</option>
+                          <option value={50}>50</option>
+                        </select>
+                        <span className="text-sm text-gray-700">entries</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleOrderPageChange(currentOrderPage - 1)}
+                          disabled={currentOrderPage === 1}
+                          className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                          Previous
+                        </button>
+                        
+                        <span className="text-sm text-gray-700">
+                          Page {currentOrderPage} of {totalOrderPages}
+                        </span>
+                        
+                        <button
+                          onClick={() => handleOrderPageChange(currentOrderPage + 1)}
+                          disabled={currentOrderPage === totalOrderPages}
+                          className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {orders.length === 0 && (
                     <div className="px-6 py-12 text-center">
@@ -440,8 +617,21 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
                     {/* Order Total */}
                     <div className="flex justify-end pt-4 border-t">
-                      <div className="text-right">
-                        <p className="text-lg font-medium text-gray-900">Total: ₹{selectedOrder.total_amount}</p>
+                      <div className="text-right space-y-2">
+                        <div className="flex justify-between gap-8">
+                          <span className="text-sm text-gray-600">Subtotal:</span>
+                          <span className="text-sm text-gray-900">₹{selectedOrder.subtotal || 0}</span>
+                        </div>
+                        <div className="flex justify-between gap-8">
+                          <span className="text-sm text-gray-600">Shipping:</span>
+                          <span className="text-sm text-gray-900">
+                            {selectedOrder.shipping_charge ? `₹${selectedOrder.shipping_charge}` : 'FREE'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between gap-8 pt-2 border-t">
+                          <span className="text-lg font-medium text-gray-900">Total:</span>
+                          <span className="text-lg font-medium text-gray-900">₹{selectedOrder.total_amount}</span>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -73,7 +73,7 @@ export default function OrderSuccess({
 
           <button
             onClick={onClose}
-            className="w-full bg-[mimasa-primary] text-white font-bold py-4 rounded-full hover:bg-[mimasa-deep] transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="w-full bg-[#8B4513] text-white font-bold py-4 rounded-full hover:bg-[#654321] transition-all duration-300 shadow-lg hover:shadow-xl border-2 border-[#8B4513]"
           >
             Continue Shopping
           </button>

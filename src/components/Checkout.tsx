@@ -4,6 +4,8 @@ import { CartItem } from '../types';
 import { getProductImageUrl } from '../utils/images';
 import { createRazorpayOrder, verifyPayment, saveOrder } from '../utils/api';
 import { PaymentVerificationData } from '../utils/razorpay';
+import { getSessionId } from '../utils/session';
+import { EmailService, OrderEmailData } from '../utils/email';
 
 interface CheckoutProps {
   isOpen: boolean;
@@ -44,6 +46,10 @@ export default function Checkout({
     0
   );
 
+  // Calculate shipping charges
+  const shippingCharge = totalAmount < 500 ? 70 : 0;
+  const finalAmount = totalAmount + shippingCharge;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPaymentError(null);
@@ -55,7 +61,7 @@ export default function Checkout({
       // Step 2: Create Razorpay order
       const receipt = `order_${Date.now()}`;
       const orderRequest = {
-        amount: totalAmount,
+        amount: finalAmount, // Use final amount including shipping
         currency: 'INR',
         receipt,
         notes: {
@@ -64,10 +70,15 @@ export default function Checkout({
           customer_phone: formData.customer_phone,
           shipping_address: formData.shipping_address,
           pin_code: formData.pin_code,
+          subtotal: totalAmount,
+          shipping_charge: shippingCharge,
+          total_amount: finalAmount
         }
       };
       
+      console.log('Creating order with request:', orderRequest);
       const orderResponse = await createRazorpayOrder(orderRequest);
+      console.log('Order response:', orderResponse);
       
       if (!orderResponse.success || !orderResponse.data) {
         throw new Error(orderResponse.error || 'Failed to create payment order');
@@ -75,9 +86,10 @@ export default function Checkout({
       
       // Step 3: Order ID returned
       const razorpayOrderId = orderResponse.data.id;
+      console.log('Razorpay Order ID:', razorpayOrderId);
       
       // Step 4-5: Open Razorpay checkout and handle payment
-      await initiateRazorpayPayment(razorpayOrderId, totalAmount, formData, receipt);
+      await initiateRazorpayPayment(razorpayOrderId, finalAmount, formData, receipt);
       
     } catch (error) {
       console.error('Payment error:', error);
@@ -94,13 +106,16 @@ export default function Checkout({
     receipt: string
   ): Promise<void> => {
     return new Promise((resolve, reject) => {
+      console.log('Initiating Razorpay payment with:', { orderId, amount, customerData, receipt });
+      
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_XXXXXXXXXXXXXXXX',
         amount: amount * 100, // Convert to paise
         currency: 'INR',
         name: 'Mimasa Foods',
         description: 'Order Payment',
-        order_id: orderId,
+        // Don't include order_id to use Classic Checkout
+        // order_id: orderId, // This triggers Standard Checkout which requires additional setup
         prefill: {
           name: customerData.customer_name,
           email: customerData.customer_email,
@@ -108,17 +123,29 @@ export default function Checkout({
         },
         notes: {
           shipping_address: customerData.shipping_address,
-          pin_code: customerData.pin_code
+          pin_code: customerData.pin_code,
+          order_receipt: receipt,
+          order_id: orderId // Keep order_id in notes for reference
         },
         theme: {
           color: '#e74c3c'
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: function() {
+            console.log('Payment cancelled by user');
             reject(new Error('Payment cancelled by user'));
-          }
+          },
+          escape: false,
+          backdropclose: false,
+          handleback: false
         },
-        handler: async (response: PaymentVerificationData) => {
+        handler: async function(response: PaymentVerificationData) {
+          console.log('Payment successful - Full response:', response);
+          console.log('Payment verification data:', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          });
           try {
             // Step 6: Verify payment signature
             const verificationResult = await verifyPayment(response);
@@ -132,9 +159,11 @@ export default function Checkout({
               ...customerData,
               order_id: orderId,
               payment_id: response.razorpay_payment_id,
+              payment_signature: response.razorpay_signature, // Add signature
               amount,
               items: cartItems,
-              created_at: new Date().toISOString()
+              created_at: new Date().toISOString(),
+              sessionId: getSessionId() // Add session ID for cart clearing
             };
             
             const saveResult = await saveOrder(orderData);
@@ -142,9 +171,38 @@ export default function Checkout({
             if (!saveResult.success) {
               throw new Error(saveResult.error || 'Failed to save order');
             }
+
+            // Send order confirmation email
+            const emailData: OrderEmailData = {
+              orderNumber: saveResult.orderNumber || receipt,
+              customerName: customerData.customer_name,
+              customerEmail: customerData.customer_email,
+              customerPhone: customerData.customer_phone,
+              shippingAddress: customerData.shipping_address,
+              pinCode: customerData.pin_code,
+              items: cartItems,
+              subtotal: totalAmount,
+              shippingCharge: shippingCharge,
+              totalAmount: finalAmount,
+              paymentId: response.razorpay_payment_id,
+              orderDate: new Date().toISOString()
+            };
+
+            // Send email asynchronously (don't block the UI)
+            EmailService.getInstance().sendOrderConfirmationEmail(emailData)
+              .then(emailResult => {
+                if (emailResult.success) {
+                  console.log('Order confirmation email sent successfully');
+                } else {
+                  console.error('Failed to send order confirmation email:', emailResult.error);
+                }
+              })
+              .catch(error => {
+                console.error('Error sending order confirmation email:', error);
+              });
             
-            // Payment successful - call success callback
-            onPaymentSuccess(receipt);
+            // Payment successful - call success callback with actual order number
+            onPaymentSuccess(saveResult.orderNumber || receipt);
             resolve();
             
           } catch (error) {
@@ -154,7 +212,9 @@ export default function Checkout({
         }
       };
       
+      console.log('Razorpay options (classic checkout):', options);
       const razorpay = new (window as any).Razorpay(options);
+      console.log('Razorpay instance created:', razorpay);
       razorpay.open();
     });
   };
@@ -225,9 +285,31 @@ export default function Checkout({
                     </div>
                   );
                 })}
-                <div className="pt-2 border-t flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span className="text-[mimasa-primary]">₹{totalAmount.toFixed(2)}</span>
+                <div className="pt-2 border-t space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span>₹{totalAmount.toFixed(2)}</span>
+                  </div>
+                  {shippingCharge > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Shipping</span>
+                      <span>₹{shippingCharge.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-lg pt-2 border-t">
+                    <span>Total</span>
+                    <span className="text-[mimasa-primary]">₹{finalAmount.toFixed(2)}</span>
+                  </div>
+                  {shippingCharge > 0 && (
+                    <div className="text-xs text-gray-500 text-center mt-2">
+                      Add ₹{(500 - totalAmount).toFixed(2)} more for free shipping!
+                    </div>
+                  )}
+                  {shippingCharge === 0 && totalAmount > 0 && (
+                    <div className="text-xs text-green-600 text-center mt-2 font-medium">
+                      🎉 Free shipping applied!
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

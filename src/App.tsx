@@ -151,67 +151,12 @@ function App() {
     setIsCheckoutOpen(true);
   };
 
-  const handleSubmitOrder = async (orderData: OrderData) => {
-    setIsSubmitting(true);
-    try {
-      if (isDemoMode) {
-        alert('Demo mode: Order functionality is not available. This is a static demo.');
-        return;
-      }
-      
-      const totalAmount = cartItems.reduce(
-        (sum, item) => sum + (item.product?.price || 0) * item.quantity,
-        0
-      );
-
-      const generatedOrderNumber = `MF${Date.now()}`;
-
-      const { data: order, error: orderError } = await supabase!
-        .from('orders')
-        .insert({
-          order_number: generatedOrderNumber,
-          ...orderData,
-          total_amount: totalAmount,
-          status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      const orderItems = cartItems.map((item) => ({
-        order_id: order.id,
-        product_id: item.product_id,
-        product_name: item.product?.name || '',
-        product_price: item.product?.price || 0,
-        quantity: item.quantity,
-        subtotal: (item.product?.price || 0) * item.quantity,
-      }));
-
-      const { error: itemsError } = await supabase!
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      const cartItemIds = cartItems.map((item) => item.id);
-      const { error: clearCartError } = await supabase!
-        .from('cart_items')
-        .delete()
-        .in('id', cartItemIds);
-
-      if (clearCartError) throw clearCartError;
-
-      setCartItems([]);
-      setIsCheckoutOpen(false);
-      setOrderNumber(generatedOrderNumber);
-      setIsOrderSuccessOpen(true);
-    } catch (error) {
-      console.error('Error submitting order:', error);
-      alert('There was an error placing your order. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handlePaymentSuccess = (orderNumber: string) => {
+    setIsCheckoutOpen(false);
+    setOrderNumber(orderNumber);
+    setIsOrderSuccessOpen(true);
+    // Clear cart after successful payment
+    setCartItems([]);
   };
 
   const handleCloseOrderSuccess = () => {
@@ -259,14 +204,17 @@ function App() {
                 isOpen={isCheckoutOpen}
                 onClose={() => setIsCheckoutOpen(false)}
                 cartItems={cartItems}
-                onSubmitOrder={handleSubmitOrder}
                 isSubmitting={isSubmitting}
+                onPaymentSuccess={handlePaymentSuccess}
               />
 
               <OrderSuccess
                 isOpen={isOrderSuccessOpen}
                 orderNumber={orderNumber}
                 onClose={handleCloseOrderSuccess}
+                paymentId={undefined} // Will be passed from Checkout in future
+                amount={undefined} // Will be passed from Checkout in future
+                paymentDate={new Date().toISOString()} // Current date
               />
             </div>
           }
