@@ -47,7 +47,7 @@ export default function Checkout({
   );
 
   // Calculate shipping charges
-  const shippingCharge = totalAmount < 500 ? 70 : 0;
+  const shippingCharge = totalAmount < 500 ? 5 : 0;
   const finalAmount = totalAmount + shippingCharge;
 
   const handleSubmit = async (e: React.FormEvent) => {
