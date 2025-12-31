@@ -104,6 +104,7 @@ serve(async (req) => {
 // Generate simple PDF invoice
 async function generateSimplePDF(orderData: any): Promise<string> {
   // Create a simple PDF using basic PDF structure
+  // Using Rs. instead of ₹ symbol to avoid encoding issues
   const pdfContent = `
 %PDF-1.4
 1 0 obj
@@ -137,7 +138,7 @@ endobj
 
 4 0 obj
 <<
-/Length 100
+/Length 150
 >>
 stream
 BT
@@ -153,7 +154,7 @@ BT
 0 -20 Td
 (Email: ${orderData.customerEmail}) Tj
 0 -40 Td
-(Total: ₹${orderData.totalAmount.toFixed(2)}) Tj
+(Total: Rs.${orderData.totalAmount.toFixed(2)}) Tj
 ET
 endstream
 endobj
@@ -184,8 +185,17 @@ startxref
 %%EOF
 `
 
-  // Convert to base64
-  return btoa(pdfContent)
+  // Convert to base64 properly
+  try {
+    // Use proper encoding for PDF content
+    const encoder = new TextEncoder()
+    const uint8Array = encoder.encode(pdfContent)
+    return btoa(String.fromCharCode(...uint8Array))
+  } catch (error) {
+    console.error('Error encoding PDF:', error)
+    // Fallback to simple base64 encoding
+    return btoa(pdfContent.replace(/[^\x00-\xFF]/g, '?'))
+  }
 }
 
 // Generate email content
@@ -200,8 +210,8 @@ function generateEmailContent(orderData: any): string {
     <tr>
       <td style="padding: 10px; border: 1px solid #ddd;">${item.product?.name || 'Product'}</td>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-      <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">₹${(item.product?.price || 0).toFixed(2)}</td>
-      <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">₹${((item.product?.price || 0) * item.quantity).toFixed(2)}</td>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">Rs.${(item.product?.price || 0).toFixed(2)}</td>
+      <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">Rs.${((item.product?.price || 0) * item.quantity).toFixed(2)}</td>
     </tr>
   `).join('')
 
@@ -263,9 +273,9 @@ function generateEmailContent(orderData: any): string {
         </table>
 
         <div class="total">
-          <p>Subtotal: ₹${orderData.subtotal.toFixed(2)}</p>
-          <p>Shipping: ${orderData.shippingCharge > 0 ? `₹${orderData.shippingCharge.toFixed(2)}` : 'FREE'}</p>
-          <p><strong>Total Amount: ₹${orderData.totalAmount.toFixed(2)}</strong></p>
+          <p>Subtotal: Rs.${orderData.subtotal.toFixed(2)}</p>
+          <p>Shipping: ${orderData.shippingCharge > 0 ? `Rs.${orderData.shippingCharge.toFixed(2)}` : 'FREE'}</p>
+          <p><strong>Total Amount: Rs.${orderData.totalAmount.toFixed(2)}</strong></p>
         </div>
 
         <div class="footer">
