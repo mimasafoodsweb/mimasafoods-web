@@ -28,6 +28,18 @@ function App() {
   useEffect(() => {
     fetchProducts();
     fetchCartItems();
+    
+    // Handle GitHub Pages SPA redirect
+    const redirect = sessionStorage.redirect;
+    if (redirect) {
+      sessionStorage.removeItem('redirect');
+      const [path, search] = redirect.split('?');
+      
+      // Navigate to the intended route
+      if (path) {
+        window.history.replaceState(null, '', path + (search ? '?' + search : ''));
+      }
+    }
   }, []);
 
   const fetchProducts = async () => {
@@ -47,8 +59,7 @@ function App() {
       setProducts(data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
-      // Fallback to demo products on error
-      setProducts(demoProducts);
+      setProducts([]);
     } finally {
       setIsLoading(false);
     }
@@ -178,7 +189,7 @@ function App() {
   }
 
   return (
-    <Router>
+    <Router basename={basename}>
       <Routes>
         <Route path="/admin" element={<AdminPanel />} />
         <Route
