@@ -21,47 +21,34 @@ export interface PaymentVerificationResponse {
 // Step 2: Fires orders API - Create Razorpay order
 export async function createRazorpayOrder(request: CreateOrderRequest): Promise<OrderApiResponse> {
   try {
-    // In production, this should call your backend API endpoint
-    // const response = await fetch('/api/razorpay/create-order', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(request),
-    // });
+    console.log('Creating Razorpay order with request:', request);
     
-    // For development, we'll simulate the API call
-    // Replace this with actual backend implementation
+    // Use Supabase Edge Function to create real Razorpay order
+    if (!supabase) {
+      throw new Error('Supabase client not initialized');
+    }
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const { data, error } = await supabase.functions.invoke('razorpay-create-order', {
+      body: request
+    });
     
-    // Mock response - in production, this comes from your backend
-    const mockOrder: RazorpayOrderResponse = {
-      id: `order_${Date.now()}`,
-      entity: 'order',
-      amount: request.amount * 100, // Razorpay expects amount in paise
-      amount_paid: 0,
-      amount_due: request.amount * 100,
-      currency: request.currency,
-      receipt: request.receipt,
-      offer_id: null,
-      status: 'created',
-      attempts: 0,
-      notes: request.notes || {},
-      created_at: Math.floor(Date.now() / 1000)
-    };
+    if (error) {
+      console.error('Supabase Edge Function error:', error);
+      throw new Error(error.message || 'Razorpay order creation service error');
+    }
+    
+    console.log('Razorpay order created successfully:', data);
     
     return {
       success: true,
-      data: mockOrder
+      data: data as RazorpayOrderResponse
     };
     
   } catch (error) {
     console.error('Error creating Razorpay order:', error);
     return {
       success: false,
-      error: 'Failed to create payment order'
+      error: error instanceof Error ? error.message : 'Failed to create payment order'
     };
   }
 }
@@ -131,7 +118,8 @@ export async function saveOrder(orderData: any & { sessionId?: string }): Promis
       (sum: number, item: any) => sum + (item.product?.price || 0) * item.quantity,
       0
     );
-    const shippingCharge = subtotal < 500 ? 70 : 0;
+    // Use the shipping charge from orderData (calculated dynamically in Checkout)
+    const shippingCharge = orderData.shippingCharge || 0;
     const totalAmount = subtotal + shippingCharge;
 
     // Generate order number

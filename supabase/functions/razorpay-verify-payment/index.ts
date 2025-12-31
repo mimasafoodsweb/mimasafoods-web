@@ -89,10 +89,36 @@ serve(async (req) => {
       generated_signature: generated_signature.substring(0, 10) + '...'
     })
 
+    // Additionally verify payment status with Razorpay
+    let paymentStatus = 'unknown'
+    if (isVerified && razorpay_payment_id) {
+      try {
+        const keyId = Deno.env.get('RAZORPAY_KEY_ID')
+        const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET')
+        
+        if (keyId && keySecret) {
+          const paymentResponse = await fetch(`https://api.razorpay.com/v1/payments/${razorpay_payment_id}`, {
+            headers: {
+              'Authorization': `Basic ${btoa(`${keyId}:${keySecret}`)}`
+            }
+          })
+          
+          if (paymentResponse.ok) {
+            const paymentData = await paymentResponse.json()
+            paymentStatus = paymentData.status
+            console.log('Payment status from Razorpay:', paymentStatus)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching payment status:', error)
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         verified: isVerified,
+        payment_status: paymentStatus,
         error: isVerified ? undefined : 'Invalid payment signature'
       }),
       { 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, CreditCard, Loader2 } from 'lucide-react';
 import { CartItem } from '../types';
 import { getProductImageUrl } from '../utils/images';
@@ -6,6 +6,7 @@ import { createRazorpayOrder, verifyPayment, saveOrder } from '../utils/api';
 import { PaymentVerificationData } from '../utils/razorpay';
 import { getSessionId } from '../utils/session';
 import { EmailService, OrderEmailData } from '../utils/email';
+import { getShippingCharge, getFreeShippingThreshold } from '../utils/cartConfig';
 
 interface CheckoutProps {
   isOpen: boolean;
@@ -41,14 +42,40 @@ export default function Checkout({
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
+  const [shippingCharge, setShippingCharge] = useState(0);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(500);
+
+  // Calculate total amount
   const totalAmount = cartItems.reduce(
     (sum, item) => sum + (item.product?.price || 0) * item.quantity,
     0
   );
 
-  // Calculate shipping charges
-  const shippingCharge = totalAmount < 500 ? 70 : 0;
-  const finalAmount = totalAmount + shippingCharge;
+  // Fetch shipping configuration from cart config
+  useEffect(() => {
+    const fetchShippingConfig = async () => {
+      try {
+        const [charge, threshold] = await Promise.all([
+          getShippingCharge(),
+          getFreeShippingThreshold()
+        ]);
+        setShippingCharge(charge);
+        setFreeShippingThreshold(threshold);
+      } catch (error) {
+        console.error('Error fetching shipping config:', error);
+        setShippingCharge(0); // Fallback to 0 if error
+        setFreeShippingThreshold(500); // Fallback to 500 if error
+      } finally {
+        // Loading complete
+      }
+    };
+
+    fetchShippingConfig();
+  }, []);
+
+  // Calculate final amount with dynamic shipping and threshold
+  const finalShippingCharge = totalAmount < freeShippingThreshold ? shippingCharge : 0;
+  const finalAmount = totalAmount + finalShippingCharge;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,14 +98,13 @@ export default function Checkout({
           shipping_address: formData.shipping_address,
           pin_code: formData.pin_code,
           subtotal: totalAmount,
-          shipping_charge: shippingCharge,
+          shipping_charge: finalShippingCharge,
           total_amount: finalAmount
         }
       };
       
-      console.log('Creating order with request:', orderRequest);
+      // Create Razorpay order
       const orderResponse = await createRazorpayOrder(orderRequest);
-      console.log('Order response:', orderResponse);
       
       if (!orderResponse.success || !orderResponse.data) {
         throw new Error(orderResponse.error || 'Failed to create payment order');
@@ -86,7 +112,6 @@ export default function Checkout({
       
       // Step 3: Order ID returned
       const razorpayOrderId = orderResponse.data.id;
-      console.log('Razorpay Order ID:', razorpayOrderId);
       
       // Step 4-5: Open Razorpay checkout and handle payment
       await initiateRazorpayPayment(razorpayOrderId, finalAmount, formData, receipt);
@@ -106,16 +131,13 @@ export default function Checkout({
     receipt: string
   ): Promise<void> => {
     return new Promise((resolve, reject) => {
-      console.log('Initiating Razorpay payment with:', { orderId, amount, customerData, receipt });
-      
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_XXXXXXXXXXXXXXXX',
         amount: amount * 100, // Convert to paise
         currency: 'INR',
         name: 'Mimasa Foods',
         description: 'Order Payment',
-        // Don't include order_id to use Classic Checkout
-        // order_id: orderId, // This triggers Standard Checkout which requires additional setup
+        order_id: orderId, // Include order_id for Standard Checkout with signature verification
         prefill: {
           name: customerData.customer_name,
           email: customerData.customer_email,
@@ -132,7 +154,6 @@ export default function Checkout({
         },
         modal: {
           ondismiss: function() {
-            console.log('Payment cancelled by user');
             reject(new Error('Payment cancelled by user'));
           },
           escape: false,
@@ -140,12 +161,6 @@ export default function Checkout({
           handleback: false
         },
         handler: async function(response: PaymentVerificationData) {
-          console.log('Payment successful - Full response:', response);
-          console.log('Payment verification data:', {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature
-          });
           try {
             // Step 6: Verify payment signature
             const verificationResult = await verifyPayment(response);
@@ -163,6 +178,7 @@ export default function Checkout({
               amount,
               items: cartItems,
               created_at: new Date().toISOString(),
+              shippingCharge: finalShippingCharge, // Add dynamic shipping charge
               sessionId: getSessionId() // Add session ID for cart clearing
             };
             
@@ -182,7 +198,7 @@ export default function Checkout({
               pinCode: customerData.pin_code,
               items: cartItems,
               subtotal: totalAmount,
-              shippingCharge: shippingCharge,
+              shippingCharge: finalShippingCharge,
               totalAmount: finalAmount,
               paymentId: response.razorpay_payment_id,
               orderDate: new Date().toISOString()
@@ -191,9 +207,7 @@ export default function Checkout({
             // Send email asynchronously (don't block the UI)
             EmailService.getInstance().sendOrderConfirmationEmail(emailData)
               .then(emailResult => {
-                if (emailResult.success) {
-                  console.log('Order confirmation email sent successfully');
-                } else {
+                if (!emailResult.success) {
                   console.error('Failed to send order confirmation email:', emailResult.error);
                 }
               })
@@ -212,9 +226,7 @@ export default function Checkout({
         }
       };
       
-      console.log('Razorpay options (classic checkout):', options);
       const razorpay = new (window as any).Razorpay(options);
-      console.log('Razorpay instance created:', razorpay);
       razorpay.open();
     });
   };
@@ -290,22 +302,22 @@ export default function Checkout({
                     <span className="text-gray-600">Subtotal</span>
                     <span>₹{totalAmount.toFixed(2)}</span>
                   </div>
-                  {shippingCharge > 0 && (
+                  {finalShippingCharge > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Shipping</span>
-                      <span>₹{shippingCharge.toFixed(2)}</span>
+                      <span>₹{finalShippingCharge.toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold text-lg pt-2 border-t">
                     <span>Total</span>
                     <span className="text-[mimasa-primary]">₹{finalAmount.toFixed(2)}</span>
                   </div>
-                  {shippingCharge > 0 && (
+                  {finalShippingCharge > 0 && (
                     <div className="text-xs text-gray-500 text-center mt-2">
-                      Add ₹{(500 - totalAmount).toFixed(2)} more for free shipping!
+                      Add ₹{(freeShippingThreshold - totalAmount).toFixed(2)} more for free shipping!
                     </div>
                   )}
-                  {shippingCharge === 0 && totalAmount > 0 && (
+                  {finalShippingCharge === 0 && totalAmount > 0 && (
                     <div className="text-xs text-green-600 text-center mt-2 font-medium">
                       🎉 Free shipping applied!
                     </div>

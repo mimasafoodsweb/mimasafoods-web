@@ -221,29 +221,29 @@ export class InvoiceGenerator {
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
       pdf.text('Subtotal:', margin + 120, yPosition);
-      pdf.text(`${orderData.subtotal.toFixed(2)}`, margin + 150, yPosition);
+      this.rightAlignText(pdf, `${orderData.subtotal.toFixed(2)}`, margin + 180, yPosition);
       
       yPosition += 7;
       
       if (orderData.shippingCharge > 0) {
         pdf.text('Shipping:', margin + 120, yPosition);
-        pdf.text(`${orderData.shippingCharge.toFixed(2)}`, margin + 150, yPosition);
+        this.rightAlignText(pdf, `${orderData.shippingCharge.toFixed(2)}`, margin + 180, yPosition);
         yPosition += 7;
       } else {
         pdf.text('Shipping:', margin + 120, yPosition);
-        pdf.text('FREE', margin + 150, yPosition);
+        this.rightAlignText(pdf, 'FREE', margin + 180, yPosition);
         yPosition += 7;
       }
       
       // Total line
       pdf.setLineWidth(0.2);
-      pdf.line(margin + 115, yPosition, pageWidth - margin, yPosition);
+      pdf.line(margin + 115, yPosition, margin + 180, yPosition);
       
       yPosition += 7;
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(12);
       pdf.text('Total Amount:', margin + 120, yPosition);
-      pdf.text(`${orderData.totalAmount.toFixed(2)}`, margin + 150, yPosition);
+      this.rightAlignText(pdf, `${orderData.totalAmount.toFixed(2)}`, margin + 180, yPosition);
       
       // Payment Information
       yPosition += 20;
@@ -471,29 +471,29 @@ export class InvoiceGenerator {
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
       pdf.text('Subtotal:', margin + 120, yPosition);
-      pdf.text(`${orderData.subtotal.toFixed(2)}`, margin + 150, yPosition);
+      this.rightAlignText(pdf, `${orderData.subtotal.toFixed(2)}`, margin + 180, yPosition);
       
       yPosition += 7;
       
       if (orderData.shippingCharge > 0) {
         pdf.text('Shipping:', margin + 120, yPosition);
-        pdf.text(`${orderData.shippingCharge.toFixed(2)}`, margin + 150, yPosition);
+        this.rightAlignText(pdf, `${orderData.shippingCharge.toFixed(2)}`, margin + 180, yPosition);
         yPosition += 7;
       } else {
         pdf.text('Shipping:', margin + 120, yPosition);
-        pdf.text('FREE', margin + 150, yPosition);
+        this.rightAlignText(pdf, 'FREE', margin + 180, yPosition);
         yPosition += 7;
       }
       
       // Total line
       pdf.setLineWidth(0.2);
-      pdf.line(margin + 115, yPosition, pageWidth - margin, yPosition);
+      pdf.line(margin + 115, yPosition, margin + 180, yPosition);
       
       yPosition += 7;
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(12);
       pdf.text('Total Amount:', margin + 120, yPosition);
-      pdf.text(`${orderData.totalAmount.toFixed(2)}`, margin + 150, yPosition);
+      this.rightAlignText(pdf, `${orderData.totalAmount.toFixed(2)}`, margin + 180, yPosition);
       
       // Payment Information
       yPosition += 20;
@@ -522,6 +522,14 @@ export class InvoiceGenerator {
       console.error('❌ Error generating PDF invoice:', error);
       throw new Error('Failed to generate PDF invoice');
     }
+  }
+
+  /**
+   * Helper function to right-align text at specific position
+   */
+  private rightAlignText(pdf: jsPDF, text: string, rightX: number, y: number): void {
+    const textWidth = pdf.getTextWidth(text);
+    pdf.text(text, rightX - textWidth, y);
   }
 
   /**

@@ -1,6 +1,7 @@
 import ManageProductDialog from './ManageProductDialog';
+import CartConfigSettings from './CartConfigSettings';
 import { useState, useEffect } from 'react';
-import { Package, ShoppingCart, BarChart3, LogOut, Menu, X, Edit, Power, PowerOff, Plus, Eye, Download } from 'lucide-react';
+import { Package, ShoppingCart, BarChart3, LogOut, Menu, X, Edit, Power, PowerOff, Plus, Eye, Download, Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Product, Order, OrderItem } from '../types';
 import { InvoiceGenerator } from '../utils/invoiceGenerator';
@@ -258,6 +259,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     { id: 'products', label: 'Products', icon: Package },
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   const renderContent = () => {
@@ -649,6 +651,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             </div>
           </div>
         );
+      case 'settings':
+        return <CartConfigSettings />;
       default:
         return null;
     }

@@ -24,14 +24,9 @@ export class EmailService {
 
   private constructor() {
     this.apiKey = import.meta.env.VITE_BREVO_API_KEY || '';
-    console.log('BREVO API Key from env:', import.meta.env.VITE_BREVO_API_KEY ? 'Found' : 'Not found');
-    console.log('Available VITE env vars:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
     
     if (!this.apiKey) {
       console.warn('BREVO API key not found in environment variables');
-      console.warn('Please add VITE_BREVO_API_KEY to your .env.local file');
-    } else {
-      console.log('🔑 BREVO API Key loaded (first 10 chars):', this.apiKey.substring(0, 10) + '...');
     }
   }
 
@@ -45,14 +40,14 @@ export class EmailService {
   /**
    * Estimate email size to avoid exceeding BREVO limits
    */
-  private estimateEmailSize(htmlContent: string, pdfBase64: string): number {
-    const base64Size = pdfBase64.length * 0.75; // Base64 is ~33% larger than binary
-    const htmlSize = new Blob([htmlContent]).size;
-    const jsonOverhead = 2048; // Estimated JSON structure overhead
-    const attachmentOverhead = 1024; // Attachment metadata overhead
-    
-    return base64Size + htmlSize + jsonOverhead + attachmentOverhead;
-  }
+  // private estimateEmailSize(htmlContent: string, pdfBase64: string): number {
+  //   const base64Size = pdfBase64.length * 0.75; // Base64 is ~33% larger than binary
+  //   const htmlSize = htmlContent.length;
+  //   const jsonOverhead = 2048; // Estimated JSON structure overhead
+  //   const attachmentOverhead = 1024; // Attachment metadata overhead
+  //   
+  //   return base64Size + htmlSize + jsonOverhead + attachmentOverhead;
+  // }
 
   /**
    * Send order confirmation email using BREVO API
@@ -70,38 +65,8 @@ export class EmailService {
       const pdfBase64 = await invoiceGenerator.generateOptimizedPDF(orderData);
       const invoiceFilename = invoiceGenerator.generateInvoiceFilename(orderData.orderNumber);
       
-      console.log('✅ Optimized PDF invoice generated, size:', pdfBase64.length, 'characters');
-      
       // Generate HTML email content
       const emailContent = this.generateOrderConfirmationEmail(orderData);
-      
-      // Debug: Log complete email content
-      console.log('=== BREVO EMAIL DEBUG INFORMATION ===');
-      console.log('📧 Email Configuration:');
-      console.log('  From:', this.senderEmail);
-      console.log('  To:', orderData.customerEmail);
-      console.log('  BCC:', this.bccEmail);
-      console.log('  Subject:', `Order Confirmation - ${orderData.orderNumber}`);
-      console.log('  Attachment:', invoiceFilename);
-      
-      console.log('  Order Number:', orderData.orderNumber);
-      console.log('  Order Date:', orderData.orderDate);
-      console.log('  Items Count:', orderData.items.length);
-      console.log('  Subtotal:', `₹${orderData.subtotal.toFixed(2)}`);
-      console.log('  Shipping:', `₹${orderData.shippingCharge.toFixed(2)}`);
-      console.log('  Total:', `₹${orderData.totalAmount.toFixed(2)}`);
-      
-      console.log('\n📦 Order Items:');
-      orderData.items.forEach((item, index) => {
-        console.log(`  ${index + 1}. ${item.product?.name || 'Product'} x${item.quantity} = ₹${((item.product?.price || 0) * item.quantity).toFixed(2)}`);
-      });
-      
-      console.log('\n📄 Complete Email HTML Content:');
-      console.log('--- START EMAIL HTML ---');
-      console.log(emailContent);
-      console.log('--- END EMAIL HTML ---');
-      
-      console.log('\n🔗 BREVO API Request:');
       const requestBody = {
         sender: {
           name: 'Mimasa Foods',
@@ -116,29 +81,19 @@ export class EmailService {
         bcc: [
           {
             email: this.bccEmail,
+            name: 'Mimasa Foods'
           },
         ],
         subject: `Order Confirmation - ${orderData.orderNumber}`,
         htmlContent: emailContent,
         attachment: [
           {
-            name: invoiceFilename,
             content: pdfBase64,
+            name: invoiceFilename,
+            type: 'application/pdf'
           },
         ],
       };
-      
-      console.log('Request Body:', JSON.stringify(requestBody, null, 2));
-      console.log('API Endpoint: https://api.brevo.com/v3/smtp/email');
-      console.log('API Key (first 10 chars):', this.apiKey.substring(0, 10) + '...');
-      
-      // Check if we're in test mode
-      const isTestEmail = orderData.customerEmail.includes('test') || orderData.customerEmail.includes('example');
-      if (isTestEmail) {
-        console.log('⚠️  Test email detected - this might not be delivered in production');
-      }
-      
-      console.log('=== END BREVO EMAIL DEBUG ===\n');
 
       const response = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
@@ -156,8 +111,7 @@ export class EmailService {
         throw new Error(`BREVO API error: ${response.status} - ${errorData.message || response.statusText}`);
       }
 
-      const result = await response.json();
-      console.log('✅ BREVO API Success Response:', result);
+      await response.json();
       
       return { success: true };
     } catch (error) {

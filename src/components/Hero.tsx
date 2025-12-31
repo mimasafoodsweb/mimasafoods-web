@@ -1,6 +1,8 @@
 import ReadyCook from '../assets/ready-cook.png';
 import Wording from '../assets/wording.png';
 import TenMin from '../assets/10-min-text.png';
+import { useState, useEffect } from 'react';
+import { getFreeShippingThreshold } from '../utils/cartConfig';
 
 export default function Hero() {
   // Load all product images from assets
@@ -9,6 +11,24 @@ export default function Hero() {
     as: 'url',
   }) as Record<string, string>;
   const images = Object.values(imageModules);
+
+  // State for free shipping threshold
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(500);
+
+  // Fetch free shipping threshold from cart config
+  useEffect(() => {
+    const fetchFreeShippingThreshold = async () => {
+      try {
+        const threshold = await getFreeShippingThreshold();
+        setFreeShippingThreshold(threshold);
+      } catch (error) {
+        console.error('Error fetching free shipping threshold:', error);
+        setFreeShippingThreshold(500); // Fallback to 500 if error
+      }
+    };
+
+    fetchFreeShippingThreshold();
+  }, []);
 
   // Animation config (horizontal). Increase image size by ~20%.
   const imageHeight = 280; // optimized height for row layout
@@ -33,7 +53,7 @@ export default function Hero() {
                   <img src={TenMin} alt="Ready in 10 Minutes" className="h-16 w-auto" />
                 </div>
                 <div className="bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-6 py-2 rounded-full font-serif font-semibold text-base shadow-large hover:shadow-xl transition-all duration-300 whitespace-nowrap">
-                  Free Delivery on Orders Above ₹500
+                  Free Delivery on Orders Above ₹{freeShippingThreshold}
                 </div>
               </div>
             </div>
