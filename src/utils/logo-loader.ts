@@ -59,20 +59,20 @@ export class LogoLoader {
   }
 
   /**
-   * Get Mimasa logo as base64 with compression
+   * Get Mimasa logo as base64 with high resolution
    */
   static async getMimasaLogo(): Promise<string> {
     try {
-      // Use JPG version from public folder for smaller size
+      // Use JPG version from public folder with higher resolution
       const logoUrl = '/MimasaLogo.jpg';
-      return await this.imageToBase64(logoUrl, 120, 60); // Compressed to 120x60 max for PDF
+      return await this.imageToBase64(logoUrl, 400, 400); // High resolution 400x400 for better quality
     } catch (error) {
       console.warn('Could not load JPG logo from public folder, trying PNG:', error);
       
       try {
-        // Fallback to PNG version
+        // Fallback to PNG version with high resolution
         const logoUrl = '/MimasaLogo.png';
-        return await this.imageToBase64(logoUrl, 120, 60);
+        return await this.imageToBase64(logoUrl, 400, 400); // High resolution 400x400 for better quality
       } catch (fallbackError) {
         console.warn('Could not load any logo, using text fallback:', fallbackError);
         throw new Error('Logo not found in public folder');

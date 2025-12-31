@@ -54,22 +54,66 @@ export class InvoiceGenerator {
       
       let yPosition = margin;
 
-      // Simple text header (no logo)
-      pdf.setFontSize(18);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(this.companyInfo.name, margin, yPosition);
-      
-      yPosition += 8;
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(this.companyInfo.address, margin, yPosition);
+      // Header with logo on left, company info on right
+      try {
+        // Logo on left side - moved up slightly
+        const logoSize = 20; // 20mm x 20mm for smaller square logo
+        const logoX = margin;
+        const logoY = yPosition - 5; // Move logo up by 5mm
+        
+        if (typeof window !== 'undefined') {
+          // Browser environment - try to load actual logo
+          try {
+            const logoBase64 = await LogoLoader.getMimasaLogo();
+            pdf.addImage(logoBase64, 'JPEG', logoX, logoY, logoSize, logoSize);
+            console.log('✅ Added small square Mimasa logo');
+          } catch (logoError) {
+            console.warn('⚠️  Could not load logo, using text-only header');
+            // Fallback to text
+            pdf.setFontSize(18);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(this.companyInfo.name, margin, yPosition);
+          }
+        } else {
+          // Node.js environment - no logo available
+          console.log('📄 Node.js environment - using text-only header');
+          pdf.setFontSize(18);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(this.companyInfo.name, margin, yPosition);
+        }
+        
+        // Company name and address in right column
+        const companyInfoX = margin + logoSize + 10; // 10mm spacing from logo
+        pdf.setFontSize(18);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(this.companyInfo.name, companyInfoX, yPosition);
+        
+        yPosition += 8;
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(this.companyInfo.address, companyInfoX, yPosition);
+        
+      } catch (error) {
+        console.warn('⚠️  Could not add logo, using text-only header:', error);
+        // Fallback to text-only header
+        pdf.setFontSize(18);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(this.companyInfo.name, margin, yPosition);
+        
+        yPosition += 8;
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(this.companyInfo.address, margin, yPosition);
+      }
       
       yPosition += 15;
 
-      // Invoice details on right side
+      // Invoice details centered
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('INVOICE', pageWidth - margin - 30, yPosition);
+      const invoiceText = 'INVOICE';
+      const invoiceTextWidth = pdf.getTextWidth(invoiceText);
+      pdf.text(invoiceText, (pageWidth - invoiceTextWidth) / 2, yPosition);
       
       yPosition += 8;
       pdf.setFontSize(10);
@@ -126,8 +170,8 @@ export class InvoiceGenerator {
       pdf.setFont('helvetica', 'bold');
       pdf.text('Product', margin, yPosition);
       pdf.text('Qty', margin + 100, yPosition);
-      pdf.text('Price', margin + 120, yPosition);
-      pdf.text('Total', margin + 150, yPosition);
+      pdf.text('Price (INR)', margin + 120, yPosition);
+      pdf.text('Total (INR)', margin + 150, yPosition);
       
       yPosition += 7;
       
@@ -153,8 +197,8 @@ export class InvoiceGenerator {
           pdf.text(line, margin, yPosition);
           if (lineIndex === 0) {
             pdf.text(quantity.toString(), margin + 100, yPosition);
-            pdf.text(`₹${unitPrice.toFixed(2)}`, margin + 120, yPosition);
-            pdf.text(`₹${totalPrice.toFixed(2)}`, margin + 150, yPosition);
+            pdf.text(`${unitPrice.toFixed(2)}`, margin + 120, yPosition);
+            pdf.text(`${totalPrice.toFixed(2)}`, margin + 150, yPosition);
           }
           yPosition += 5;
         });
@@ -177,13 +221,13 @@ export class InvoiceGenerator {
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
       pdf.text('Subtotal:', margin + 120, yPosition);
-      pdf.text(`₹${orderData.subtotal.toFixed(2)}`, margin + 150, yPosition);
+      pdf.text(`${orderData.subtotal.toFixed(2)}`, margin + 150, yPosition);
       
       yPosition += 7;
       
       if (orderData.shippingCharge > 0) {
         pdf.text('Shipping:', margin + 120, yPosition);
-        pdf.text(`₹${orderData.shippingCharge.toFixed(2)}`, margin + 150, yPosition);
+        pdf.text(`${orderData.shippingCharge.toFixed(2)}`, margin + 150, yPosition);
         yPosition += 7;
       } else {
         pdf.text('Shipping:', margin + 120, yPosition);
@@ -199,7 +243,7 @@ export class InvoiceGenerator {
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(12);
       pdf.text('Total Amount:', margin + 120, yPosition);
-      pdf.text(`₹${orderData.totalAmount.toFixed(2)}`, margin + 150, yPosition);
+      pdf.text(`${orderData.totalAmount.toFixed(2)}`, margin + 150, yPosition);
       
       // Payment Information
       yPosition += 20;
@@ -314,10 +358,12 @@ export class InvoiceGenerator {
         yPosition += 30;
       }
 
-      // Invoice details on right side
+      // Invoice details centered
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('INVOICE', pageWidth - margin - 30, yPosition);
+      const invoiceText = 'INVOICE';
+      const invoiceTextWidth = pdf.getTextWidth(invoiceText);
+      pdf.text(invoiceText, (pageWidth - invoiceTextWidth) / 2, yPosition);
       
       yPosition += 8;
       pdf.setFontSize(10);
@@ -374,8 +420,8 @@ export class InvoiceGenerator {
       pdf.setFont('helvetica', 'bold');
       pdf.text('Product', margin, yPosition);
       pdf.text('Qty', margin + 100, yPosition);
-      pdf.text('Price', margin + 120, yPosition);
-      pdf.text('Total', margin + 150, yPosition);
+      pdf.text('Price (INR)', margin + 120, yPosition);
+      pdf.text('Total (INR)', margin + 150, yPosition);
       
       yPosition += 7;
       
@@ -401,8 +447,8 @@ export class InvoiceGenerator {
           pdf.text(line, margin, yPosition);
           if (lineIndex === 0) {
             pdf.text(quantity.toString(), margin + 100, yPosition);
-            pdf.text(`₹${unitPrice.toFixed(2)}`, margin + 120, yPosition);
-            pdf.text(`₹${totalPrice.toFixed(2)}`, margin + 150, yPosition);
+            pdf.text(`${unitPrice.toFixed(2)}`, margin + 120, yPosition);
+            pdf.text(`${totalPrice.toFixed(2)}`, margin + 150, yPosition);
           }
           yPosition += 5;
         });
@@ -425,13 +471,13 @@ export class InvoiceGenerator {
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
       pdf.text('Subtotal:', margin + 120, yPosition);
-      pdf.text(`₹${orderData.subtotal.toFixed(2)}`, margin + 150, yPosition);
+      pdf.text(`${orderData.subtotal.toFixed(2)}`, margin + 150, yPosition);
       
       yPosition += 7;
       
       if (orderData.shippingCharge > 0) {
         pdf.text('Shipping:', margin + 120, yPosition);
-        pdf.text(`₹${orderData.shippingCharge.toFixed(2)}`, margin + 150, yPosition);
+        pdf.text(`${orderData.shippingCharge.toFixed(2)}`, margin + 150, yPosition);
         yPosition += 7;
       } else {
         pdf.text('Shipping:', margin + 120, yPosition);
@@ -447,7 +493,7 @@ export class InvoiceGenerator {
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(12);
       pdf.text('Total Amount:', margin + 120, yPosition);
-      pdf.text(`₹${orderData.totalAmount.toFixed(2)}`, margin + 150, yPosition);
+      pdf.text(`${orderData.totalAmount.toFixed(2)}`, margin + 150, yPosition);
       
       // Payment Information
       yPosition += 20;

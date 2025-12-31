@@ -66,25 +66,14 @@ export class EmailService {
       console.log('📄 Generating PDF invoice attachment...');
       const invoiceGenerator = InvoiceGenerator.getInstance();
       
-      // Generate PDF invoice
-      const pdfBase64 = await invoiceGenerator.generateInvoicePDF(orderData);
+      // Generate optimized PDF invoice
+      const pdfBase64 = await invoiceGenerator.generateOptimizedPDF(orderData);
       const invoiceFilename = invoiceGenerator.generateInvoiceFilename(orderData.orderNumber);
       
-      console.log('✅ PDF invoice generated, size:', pdfBase64.length, 'characters');
-
+      console.log('✅ Optimized PDF invoice generated, size:', pdfBase64.length, 'characters');
+      
+      // Generate HTML email content
       const emailContent = this.generateOrderConfirmationEmail(orderData);
-      
-      // Check email size before sending
-      const estimatedSize = this.estimateEmailSize(emailContent, pdfBase64);
-      console.log('📊 Estimated email size:', Math.round(estimatedSize / 1024 / 1024 * 100) / 100, 'MB');
-      
-      let finalPdfBase64 = pdfBase64;
-      if (estimatedSize > 19 * 1024 * 1024) { // 19MB to stay under 20MB limit
-        console.warn('⚠️  Email size too large, using text-only PDF...');
-        // Generate a smaller PDF without logo
-        finalPdfBase64 = await invoiceGenerator.generateOptimizedPDF(orderData);
-        console.log('✅ Optimized PDF generated, size:', finalPdfBase64.length, 'characters');
-      }
       
       // Debug: Log complete email content
       console.log('=== BREVO EMAIL DEBUG INFORMATION ===');
@@ -95,12 +84,7 @@ export class EmailService {
       console.log('  Subject:', `Order Confirmation - ${orderData.orderNumber}`);
       console.log('  Attachment:', invoiceFilename);
       
-      console.log('\n📋 Order Data:');
       console.log('  Order Number:', orderData.orderNumber);
-      console.log('  Customer Name:', orderData.customerName);
-      console.log('  Customer Email:', orderData.customerEmail);
-      console.log('  Customer Phone:', orderData.customerPhone);
-      console.log('  Payment ID:', orderData.paymentId);
       console.log('  Order Date:', orderData.orderDate);
       console.log('  Items Count:', orderData.items.length);
       console.log('  Subtotal:', `₹${orderData.subtotal.toFixed(2)}`);
@@ -139,7 +123,7 @@ export class EmailService {
         attachment: [
           {
             name: invoiceFilename,
-            content: finalPdfBase64,
+            content: pdfBase64,
           },
         ],
       };

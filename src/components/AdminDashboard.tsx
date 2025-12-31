@@ -159,7 +159,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       console.log('📄 Generating PDF with items:', orderEmailData.items.length);
       const invoiceGenerator = InvoiceGenerator.getInstance();
-      const pdfBase64 = await invoiceGenerator.generateInvoicePDF(orderEmailData);
+      const pdfBase64 = await invoiceGenerator.generateOptimizedPDF(orderEmailData);
       const invoiceFilename = invoiceGenerator.generateInvoiceFilename(order.order_number);
       
       // Convert base64 to blob and download

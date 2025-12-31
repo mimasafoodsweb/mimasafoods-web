@@ -96,8 +96,8 @@ export async function testPDFInvoiceGeneration(): Promise<void> {
   try {
     const invoiceGenerator = InvoiceGenerator.getInstance();
     
-    console.log('📄 Generating PDF invoice...');
-    const pdfBase64 = await invoiceGenerator.generateInvoicePDF(testOrderData);
+    console.log('📄 Generating optimized PDF invoice...');
+    const pdfBase64 = await invoiceGenerator.generateOptimizedPDF(testOrderData);
     const filename = invoiceGenerator.generateInvoiceFilename(testOrderData.orderNumber);
     
     console.log('✅ PDF generated successfully!');
