@@ -28,7 +28,7 @@ jobs:
         echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
         echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
         echo "VITE_RAZORPAY_KEY_ID=${{ secrets.VITE_RAZORPAY_KEY_ID }}" >> .env
-        echo "VITE_BREVO_API_KEY=${{ secrets.VITE_BREVO_API_KEY }}" >> .env
+        # Note: VITE_BREVO_API_KEY is NOT included in build to avoid embedding secrets
         
     - name: Build
       run: npm run build
@@ -36,7 +36,7 @@ jobs:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         VITE_RAZORPAY_KEY_ID: ${{ secrets.VITE_RAZORPAY_KEY_ID }}
-        VITE_BREVO_API_KEY: ${{ secrets.VITE_BREVO_API_KEY }}
+        # VITE_BREVO_API_KEY intentionally excluded to prevent embedding in build
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
