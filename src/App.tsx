@@ -30,15 +30,15 @@ function App() {
     fetchCartItems();
     
     // Handle GitHub Pages SPA redirect
-    const redirect = sessionStorage.redirect;
+    const redirect = sessionStorage.getItem('spa-redirect');
     if (redirect) {
-      sessionStorage.removeItem('redirect');
-      const [path, search] = redirect.split('?');
+      sessionStorage.removeItem('spa-redirect');
+      const path = redirect.split('?')[0].split('#')[0];
+      const search = redirect.includes('?') ? '?' + redirect.split('?')[1].split('#')[0] : '';
+      const hash = redirect.includes('#') ? '#' + redirect.split('#')[1] : '';
       
       // Navigate to the intended route
-      if (path) {
-        window.history.replaceState(null, '', path + (search ? '?' + search : ''));
-      }
+      window.history.replaceState(null, '', path + search + hash);
     }
   }, []);
 
@@ -189,7 +189,7 @@ function App() {
   }
 
   return (
-    <Router basename={basename}>
+    <Router>
       <Routes>
         <Route path="/admin" element={<AdminPanel />} />
         <Route
