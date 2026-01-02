@@ -56,7 +56,7 @@ Please note that custom offers, bundled promotions, or certain perishable items 
             </p>
           </div>
 
-          <div id="about">
+          <div>
             <h4 className="text-xl font-serif font-semibold mb-6 text-mimasa-warm">Contact Us</h4>
             <div className="space-y-3 text-mimasa-cream">
               <p>Mimasa Foods Pvt Ltd</p>
