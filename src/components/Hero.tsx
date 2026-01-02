@@ -30,9 +30,9 @@ export default function Hero() {
     fetchFreeShippingThreshold();
   }, []);
 
-  // Animation config (horizontal). Increase image size by ~20%.
-  const imageHeight = 280; // optimized height for row layout
-  const itemWidth = 420; // increased width since we have full width available in row layout
+  // Animation config (horizontal). Adjust for mobile responsiveness
+  const imageHeight = 200; // reduced height for mobile
+  const itemWidth = 320; // reduced width for mobile
   const rollWidth = itemWidth * images.length; // total translate distance
   const durationSeconds = Math.max(5, images.length * 1.5); // speed based on count
 
@@ -43,27 +43,34 @@ export default function Hero() {
           {/* Top row: hero content */}
           <div className="text-center py-2">
             <div className="flex flex-col items-center gap-4">
-              <div className="flex items-center justify-center gap-8 flex-wrap sm:flex-nowrap">
-                <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
-                  <h2 className="text-2xl font-serif font-semibold text-mimasa-deep whitespace-nowrap">
+              {/* Main content row - stack vertically on mobile */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full">
+                {/* Left section: Title and images */}
+                <div className="flex flex-col items-center gap-3 sm:gap-4">
+                  <h2 className="text-xl sm:text-2xl font-serif font-semibold text-mimasa-deep text-center">
                     Homemade Delicacies
                   </h2>
-                  <img src={ReadyCook} alt="Ready to Cook" className="h-16 w-auto" />
-                  <img src={Wording} alt="Wording" className="h-12 w-auto" />
-                  <img src={TenMin} alt="Ready in 10 Minutes" className="h-16 w-auto" />
+                  <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
+                    <img src={ReadyCook} alt="Ready to Cook" className="h-12 sm:h-16 w-auto" />
+                    <img src={Wording} alt="Wording" className="h-10 sm:h-12 w-auto" />
+                    <img src={TenMin} alt="Ready in 10 Minutes" className="h-12 sm:h-16 w-auto" />
+                  </div>
                 </div>
-                <div className="bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-6 py-2 rounded-full font-serif font-semibold text-base shadow-large hover:shadow-xl transition-all duration-300 whitespace-nowrap">
-                  Free Delivery on Orders Above ₹{freeShippingThreshold}
+                
+                {/* Right section: Free delivery badge - full width on mobile */}
+                <div className="w-full sm:w-auto flex justify-center">
+                  <div className="bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-4 sm:px-6 py-2 rounded-full font-serif font-semibold text-sm sm:text-base shadow-large hover:shadow-xl transition-all duration-300 text-center">
+                    Free Delivery on Orders Above ₹{freeShippingThreshold}
+                  </div>
                 </div>
               </div>
             </div>
-
           </div>
 
           {/* Bottom row: animated rolling product images */}
           <div className="w-full">
             <div
-              className="relative overflow-hidden rounded-3xl shadow-large bg-white/70 backdrop-blur-sm border border-mimasa-warm/20 max-w-full mx-auto"
+              className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-large bg-white/70 backdrop-blur-sm border border-mimasa-warm/20 max-w-full mx-auto"
               style={{ height: imageHeight + 12, maxWidth: '100%' }}
             >
               <div
@@ -75,7 +82,7 @@ export default function Hero() {
               >
                 {[...images, ...images].map((src, idx) => (
                   <div key={idx} className="flex items-center justify-center" style={{ width: itemWidth, height: imageHeight + 32 }}>
-                    <img src={src} alt="Product" style={{ height: imageHeight + 120 }} className="object-contain drop-shadow-lg" />
+                    <img src={src} alt="Product" style={{ height: imageHeight + 80 }} className="object-contain drop-shadow-lg" />
                   </div>
                 ))}
               </div>
@@ -89,15 +96,15 @@ export default function Hero() {
           </div>
 
           {/* Marquee text section */}
-          <div className="w-full overflow-hidden bg-gradient-to-r from-mimasa-primary/10 to-mimasa-secondary/10 rounded-2xl py-3 border border-mimasa-warm/30">
+          <div className="w-full overflow-hidden bg-gradient-to-r from-mimasa-primary/10 to-mimasa-secondary/10 rounded-xl sm:rounded-2xl py-2 sm:py-3 border border-mimasa-warm/30">
             <div className="flex animate-marquee whitespace-nowrap">
-              <span className="text-lg font-semibold text-mimasa-deep mx-4">
+              <span className="text-sm sm:text-lg font-semibold text-mimasa-deep mx-2 sm:mx-4">
                 Our USP are - The wet gravies retain authentic taste and aroma. No artificial flavors and colors. Affordable prices and available at leading retailers.
               </span>
-              <span className="text-lg font-semibold text-mimasa-deep mx-4">
+              <span className="text-sm sm:text-lg font-semibold text-mimasa-deep mx-2 sm:mx-4">
                 Our USP are - The wet gravies retain authentic taste and aroma. No artificial flavors and colors. Affordable prices and available at leading retailers.
               </span>
-              <span className="text-lg font-semibold text-mimasa-deep mx-4">
+              <span className="text-sm sm:text-lg font-semibold text-mimasa-deep mx-2 sm:mx-4">
                 Our USP are - The wet gravies retain authentic taste and aroma. No artificial flavors and colors. Affordable prices and available at leading retailers.
               </span>
             </div>
