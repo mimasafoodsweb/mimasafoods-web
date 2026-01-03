@@ -50,7 +50,7 @@ export class EmailService {
         headers: {
           'accept': 'application/json',
           'content-type': 'application/json',
-          'api-key': import.meta.env.VITE_BREVO_API_KEY || '',
+          'api-key': import.meta.env.BREML_PWD || '',
         },
         body: JSON.stringify({
           sender: {
