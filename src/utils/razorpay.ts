@@ -42,9 +42,17 @@ export class RazorpayService {
   private constructor() {
     // Initialize with your Razorpay credentials
     // In production, these should be environment variables
+    const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_XXXXXXXXXXXXXXXX';
+    const keySecret = import.meta.env.VITE_RAZORPAY_KEY_SECRET || 'your_secret_key';
+    
+    // Debug logging - remove in production
+    console.log('🔑 Razorpay Key ID:', keyId);
+    console.log('🔑 Key ID length:', keyId.length);
+    console.log('🔑 Key ID format check:', keyId.startsWith('rzp_test_') || keyId.startsWith('rzp_live_'));
+    
     this.razorpay = new Razorpay({
-      key_id: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_XXXXXXXXXXXXXXXX',
-      key_secret: import.meta.env.VITE_RAZORPAY_KEY_SECRET || 'your_secret_key'
+      key_id: keyId,
+      key_secret: keySecret
     });
   }
 
@@ -112,8 +120,14 @@ export class RazorpayService {
     onSuccess: (paymentData: PaymentVerificationData) => void,
     onFailure: (error: any) => void
   ): void {
+    const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_XXXXXXXXXXXXXXXX';
+    
+    // Debug logging - remove in production
+    console.log('🔑 Checkout Razorpay Key ID:', keyId);
+    console.log('🔑 Checkout Key ID length:', keyId.length);
+    
     const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_XXXXXXXXXXXXXXXX',
+      key: keyId,
       amount: amount * 100, // Razorpay expects amount in paise
       currency: 'INR',
       name: 'Mimasa Foods',
