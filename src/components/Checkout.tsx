@@ -5,7 +5,7 @@ import { getProductImageUrl } from '../utils/images';
 import { createRazorpayOrder, verifyPayment, saveOrder } from '../utils/api';
 import { PaymentVerificationData } from '../utils/razorpay';
 import { getSessionId } from '../utils/session';
-import { EmailService, OrderEmailData } from '../utils/email';
+import { EmailService, OrderEmailData } from '../utils/emailService';
 import { getShippingCharge, getFreeShippingThreshold } from '../utils/cartConfig';
 
 interface CheckoutProps {
