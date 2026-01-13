@@ -109,85 +109,83 @@ function generateEmailContent(orderData: any): string {
     day: 'numeric'
   })
 
-  const itemsList = orderData.items.map((item: any) => `
-    <tr>
+  const itemsList = orderData.items.map((item: any) => 
+    `<tr>
       <td style="padding: 10px; border: 1px solid #ddd;">${item.product?.name || 'Product'}</td>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.quantity}</td>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">Rs.${(item.product?.price || 0).toFixed(2)}</td>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">Rs.${((item.product?.price || 0) * item.quantity).toFixed(2)}</td>
-    </tr>
-  `).join('')
+    </tr>`
+  ).join('')
 
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Order Confirmation - ${orderData.orderNumber}</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #ff6b35; padding-bottom: 20px; margin-bottom: 30px; }
-        .logo { font-size: 24px; font-weight: bold; color: #ff6b35; margin-bottom: 10px; }
-        .order-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .table th { background: #ff6b35; color: white; padding: 10px; text-align: left; }
-        .table td { padding: 10px; border: 1px solid #ddd; }
-        .total { text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <div class="logo">Mimasa Foods</div>
-          <h2>Order Confirmation</h2>
-          <p>Thank you for your order! We're preparing it with care.</p>
-        </div>
-        
-        <div class="order-info">
-          <h3>Order Details</h3>
-          <p><strong>Order Number:</strong> ${orderData.orderNumber}</p>
-          <p><strong>Date:</strong> ${orderDate}</p>
-          <p><strong>Payment ID:</strong> ${orderData.paymentId}</p>
-        </div>
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Order Confirmation - ${orderData.orderNumber}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .header { text-align: center; border-bottom: 2px solid #ff6b35; padding-bottom: 20px; margin-bottom: 30px; }
+    .logo { font-size: 24px; font-weight: bold; color: #ff6b35; margin-bottom: 10px; }
+    .order-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .table th { background: #ff6b35; color: white; padding: 10px; text-align: left; }
+    .table td { padding: 10px; border: 1px solid #ddd; }
+    .total { text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; }
+    .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">Mimasa Foods</div>
+      <h2>Order Confirmation</h2>
+      <p>Thank you for your order! We are preparing it with care.</p>
+    </div>
+    
+    <div class="order-info">
+      <h3>Order Details</h3>
+      <p><strong>Order Number:</strong> ${orderData.orderNumber}</p>
+      <p><strong>Date:</strong> ${orderDate}</p>
+      <p><strong>Payment ID:</strong> ${orderData.paymentId}</p>
+    </div>
 
-        <div class="order-info">
-          <h3>Customer Information</h3>
-          <p><strong>Name:</strong> ${orderData.customerName}</p>
-          <p><strong>Email:</strong> ${orderData.customerEmail}</p>
-          <p><strong>Phone:</strong> ${orderData.customerPhone}</p>
-          <p><strong>Shipping Address:</strong> ${orderData.shippingAddress}, ${orderData.pinCode}</p>
-        </div>
+    <div class="order-info">
+      <h3>Customer Information</h3>
+      <p><strong>Name:</strong> ${orderData.customerName}</p>
+      <p><strong>Email:</strong> ${orderData.customerEmail}</p>
+      <p><strong>Phone:</strong> ${orderData.customerPhone}</p>
+      <p><strong>Shipping Address:</strong> ${orderData.shippingAddress}, ${orderData.pinCode}</p>
+    </div>
 
-        <h3>Order Items</h3>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th style="text-align: center;">Quantity</th>
-              <th style="text-align: right;">Price</th>
-              <th style="text-align: right;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsList}
-          </tbody>
-        </table>
+    <h3>Order Items</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th style="text-align: center;">Quantity</th>
+          <th style="text-align: right;">Price</th>
+          <th style="text-align: right;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsList}
+      </tbody>
+    </table>
 
-        <div class="total">
-          <p>Subtotal: Rs.${orderData.subtotal.toFixed(2)}</p>
-          <p>Shipping: ${orderData.shippingCharge > 0 ? `Rs.${orderData.shippingCharge.toFixed(2)}` : 'FREE'}</p>
-          <p><strong>Total Amount: Rs.${orderData.totalAmount.toFixed(2)}</strong></p>
-        </div>
+    <div class="total">
+      <p>Subtotal: Rs.${orderData.subtotal.toFixed(2)}</p>
+      <p>Shipping: ${orderData.shippingCharge > 0 ? `Rs.${orderData.shippingCharge.toFixed(2)}` : 'FREE'}</p>
+      <p><strong>Total Amount: Rs.${orderData.totalAmount.toFixed(2)}</strong></p>
+    </div>
 
-        <div class="footer">
-          <p>Thank you for choosing Mimasa Foods!</p>
-          <p>If you have any questions, please contact us at mimasafoods@gmail.com</p>
-          <p>Homemade delicacy with authentic Indian flavors</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `
+    <div class="footer">
+      <p>Thank you for choosing Mimasa Foods!</p>
+      <p>If you have any questions, please contact us at mimasafoods@gmail.com</p>
+      <p>Homemade delicacy with authentic Indian flavors</p>
+    </div>
+  </div>
+</body>
+</html>`
 }
