@@ -1,7 +1,7 @@
 // Google Analytics utilities
 declare global {
   interface Window {
-    gtag: (command: string, targetId: string, config?: Record<string, any>) => void;
+    gtag: (command: string, targetId: string, config?: Record<string, unknown>) => void;
   }
 }
 
@@ -43,7 +43,14 @@ export const trackEvent = (action: string, category: string, label?: string, val
 };
 
 // E-commerce tracking
-export const trackPurchase = (transactionId: string, value: number, items: any[]) => {
+interface EcommerceItem {
+  item_id: string;
+  item_name: string;
+  price: number;
+  quantity: number;
+}
+
+export const trackPurchase = (transactionId: string, value: number, items: EcommerceItem[]) => {
   if (!GA_MEASUREMENT_ID || typeof window.gtag !== 'function') return;
   
   window.gtag('event', 'purchase', {
@@ -69,7 +76,7 @@ export const trackAddToCart = (productName: string, productId: string, price: nu
   });
 };
 
-export const trackBeginCheckout = (value: number, items: any[]) => {
+export const trackBeginCheckout = (value: number, items: EcommerceItem[]) => {
   if (!GA_MEASUREMENT_ID || typeof window.gtag !== 'function') return;
   
   window.gtag('event', 'begin_checkout', {

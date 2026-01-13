@@ -1,4 +1,4 @@
-import { ShoppingCart, X } from 'lucide-react';
+import { ShoppingCart, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { Product } from '../types';
 import { getProductImageUrl } from '../utils/images';
@@ -10,7 +10,19 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
   const resolvedImg = getProductImageUrl(product.name.toUpperCase()) || product.image_url;
+  const backImage = getProductImageUrl(`${product.name.toUpperCase()} BACK`) || product.image_url;
+  const images = [resolvedImg, backImage].filter(Boolean);
+  
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+  
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
   return (
     <div className="bg-white rounded-3xl shadow-soft hover:shadow-large transition-all duration-300 overflow-hidden group border border-mimasa-cream/50">
       <div className="relative overflow-hidden h-56">
@@ -58,14 +70,48 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
           <div className="relative bg-white rounded-3xl shadow-large max-w-5xl w-[94%] md:w-[1000px] overflow-hidden border border-mimasa-cream">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 p-3 rounded-full bg-white/90 hover:bg-white shadow-medium hover:shadow-large transition-all duration-200"
+              className="absolute top-4 right-4 p-3 rounded-full bg-white/90 hover:bg-white shadow-medium hover:shadow-large transition-all duration-200 z-10"
               aria-label="Close"
             >
               <X className="w-5 h-5 text-mimasa-deep" />
             </button>
             <div className="grid md:grid-cols-2 gap-0">
-              <div className="bg-gradient-to-br from-mimasa-cream to-mimasa-warm/30">
-                <img src={resolvedImg} alt={product.name} className="w-full h-[40vh] md:h-[45vh] object-cover" />
+              <div className="relative bg-gradient-to-br from-mimasa-cream to-mimasa-warm/30 h-[40vh] md:h-[45vh]">
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white shadow-medium hover:shadow-large transition-all duration-200 z-10"
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-mimasa-deep" />
+                    </button>
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white shadow-medium hover:shadow-large transition-all duration-200 z-10"
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="w-4 h-4 text-mimasa-deep" />
+                    </button>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+                      {images.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentImageIndex(index)}
+                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                            index === currentImageIndex ? 'bg-mimasa-primary w-6' : 'bg-white/60'
+                          }`}
+                          aria-label={`Go to image ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+                <img 
+                  src={images[currentImageIndex]} 
+                  alt={product.name} 
+                  className={`w-full h-full object-contain ${currentImageIndex === 0 ? 'scale-110' : ''}`} 
+                />
               </div>
               <div className="p-8 w-full max-w-xl mx-auto">
                 <h3 className="text-3xl font-serif font-semibold text-mimasa-deep mb-4">{product.name}</h3>

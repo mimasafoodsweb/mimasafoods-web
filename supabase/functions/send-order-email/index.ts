@@ -102,14 +102,33 @@ serve(async (req) => {
 })
 
 // Generate email content
-function generateEmailContent(orderData: any): string {
+function generateEmailContent(orderData: {
+  orderNumber: string;
+  orderDate: string;
+  paymentId: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  shippingAddress: string;
+  pinCode: string;
+  items: Array<{
+    product?: {
+      name: string;
+      price: number;
+    };
+    quantity: number;
+  }>;
+  subtotal: number;
+  shippingCharge: number;
+  totalAmount: number;
+}): string {
   const orderDate = new Date(orderData.orderDate).toLocaleDateString('en-IN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   })
 
-  const itemsList = orderData.items.map((item: any) => 
+  const itemsList = orderData.items.map((item) => 
     `<tr>
       <td style="padding: 10px; border: 1px solid #ddd;">${item.product?.name || 'Product'}</td>
       <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.quantity}</td>

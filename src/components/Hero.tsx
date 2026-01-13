@@ -5,12 +5,15 @@ import { useState, useEffect } from 'react';
 import { getFreeShippingThreshold } from '../utils/cartConfig';
 
 export default function Hero() {
-  // Load all product images from assets
+  // Load all product images from assets (excluding BACK images)
   const imageModules = import.meta.glob('../assets/product_images/*.{png,PNG,jpg,JPG,jpeg,JPEG,webp,WEBP}', {
     eager: true,
     as: 'url',
   }) as Record<string, string>;
-  const images = Object.values(imageModules);
+  
+  // Filter out BACK images from the carousel
+  const allImages = Object.values(imageModules);
+  const images = allImages.filter(imageUrl => !imageUrl.includes('BACK.png'));
 
   // State for free shipping threshold
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(500);

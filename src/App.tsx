@@ -41,6 +41,7 @@ function App() {
       // Navigate to the intended route
       window.history.replaceState(null, '', path + search + hash);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchProducts = async () => {
