@@ -50,7 +50,7 @@ export default function Hero() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full">
                 {/* Left section: Title and images */}
                 <div className="flex flex-col items-center gap-3 sm:gap-4">
-                  <h2 className="text-xl sm:text-2xl font-serif font-semibold text-mimasa-deep text-center">
+                  <h2 className="text-lg sm:text-xl font-serif font-semibold text-mimasa-deep text-center">
                     Homemade Delicacies
                   </h2>
                   <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
@@ -62,7 +62,7 @@ export default function Hero() {
                 
                 {/* Right section: Free delivery badge - full width on mobile */}
                 <div className="w-full sm:w-auto flex justify-center">
-                  <div className="bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-4 sm:px-6 py-2 rounded-full font-serif font-semibold text-sm sm:text-base shadow-large hover:shadow-xl transition-all duration-300 text-center">
+                  <div className="bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-4 sm:px-6 py-2 rounded-full font-serif font-semibold text-xs sm:text-sm shadow-large hover:shadow-xl transition-all duration-300 text-center">
                     Free Delivery on Orders Above ₹{freeShippingThreshold}
                   </div>
                 </div>
@@ -101,13 +101,13 @@ export default function Hero() {
           {/* Marquee text section */}
           <div className="w-full overflow-hidden bg-gradient-to-r from-mimasa-primary/10 to-mimasa-secondary/10 rounded-xl sm:rounded-2xl py-2 sm:py-3 border border-mimasa-warm/30">
             <div className="flex animate-marquee whitespace-nowrap">
-              <span className="text-sm sm:text-lg font-semibold text-mimasa-deep mx-2 sm:mx-4">
+              <span className="text-xs sm:text-sm font-semibold text-mimasa-deep mx-2 sm:mx-4">
                 Our USP are - The wet gravies retain authentic taste and aroma. No artificial flavors and colors. Affordable prices and available at leading retailers.
               </span>
-              <span className="text-sm sm:text-lg font-semibold text-mimasa-deep mx-2 sm:mx-4">
+              <span className="text-xs sm:text-sm font-semibold text-mimasa-deep mx-2 sm:mx-4">
                 Our USP are - The wet gravies retain authentic taste and aroma. No artificial flavors and colors. Affordable prices and available at leading retailers.
               </span>
-              <span className="text-sm sm:text-lg font-semibold text-mimasa-deep mx-2 sm:mx-4">
+              <span className="text-xs sm:text-sm font-semibold text-mimasa-deep mx-2 sm:mx-4">
                 Our USP are - The wet gravies retain authentic taste and aroma. No artificial flavors and colors. Affordable prices and available at leading retailers.
               </span>
             </div>

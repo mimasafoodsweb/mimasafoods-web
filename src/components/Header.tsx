@@ -36,7 +36,7 @@ export default function Header({ cartItemCount, onCartClick }: HeaderProps) {
               alt="Mimasa Foods Pvt. Ltd. logo" 
               className="h-14 sm:h-20 w-auto mr-2 sm:mr-4" 
             />
-            <h1 className="text-lg sm:text-2xl lg:text-3xl font-serif font-semibold text-mimasa-deep tracking-wide leading-tight">
+            <h1 className="text-base sm:text-xl lg:text-2xl font-serif font-semibold text-mimasa-deep tracking-wide leading-tight">
               Mimasa Foods Pvt. Ltd.
             </h1>
           </div>
@@ -45,19 +45,19 @@ export default function Header({ cartItemCount, onCartClick }: HeaderProps) {
           <nav className="hidden md:flex space-x-6 lg:space-x-8">
             <button 
               onClick={() => handleNavClick('products')}
-              className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium"
+              className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium text-sm sm:text-base"
             >
               Products
             </button>
             <button 
               onClick={() => handleNavClick('about')}
-              className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium"
+              className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium text-sm sm:text-base"
             >
               About Us
             </button>
             <button 
               onClick={() => handleNavClick('contact')}
-              className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium"
+              className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium text-sm sm:text-base"
             >
               Contact
             </button>
@@ -66,7 +66,7 @@ export default function Header({ cartItemCount, onCartClick }: HeaderProps) {
           {/* Cart button - always visible */}
           <button
             onClick={onCartClick}
-            className="relative flex items-center space-x-1 sm:space-x-2 bg-mimasa-primary text-white px-3 sm:px-6 py-2 sm:py-3 rounded-full hover:bg-mimasa-deep transition-all duration-300 shadow-medium hover:shadow-large font-medium text-sm sm:text-base"
+            className="relative flex items-center space-x-1 sm:space-x-2 bg-mimasa-primary text-white px-3 sm:px-6 py-2 sm:py-3 rounded-full hover:bg-mimasa-deep transition-all duration-300 shadow-medium hover:shadow-large font-medium text-xs sm:text-sm"
           >
             <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden sm:inline font-medium">Cart</span>
@@ -96,19 +96,19 @@ export default function Header({ cartItemCount, onCartClick }: HeaderProps) {
             <nav className="flex flex-col space-y-3">
               <button 
                 onClick={() => handleNavClick('products')}
-                className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium text-left px-4 py-2 rounded-lg hover:bg-mimasa-warm/20"
+                className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium text-sm sm:text-base text-left px-4 py-2 rounded-lg hover:bg-mimasa-warm/20"
               >
                 Products
               </button>
               <button 
                 onClick={() => handleNavClick('about')}
-                className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium text-left px-4 py-2 rounded-lg hover:bg-mimasa-warm/20"
+                className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium text-sm sm:text-base text-left px-4 py-2 rounded-lg hover:bg-mimasa-warm/20"
               >
                 About Us
               </button>
               <button 
                 onClick={() => handleNavClick('contact')}
-                className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium text-left px-4 py-2 rounded-lg hover:bg-mimasa-warm/20"
+                className="text-mimasa-deep hover:text-mimasa-primary transition-colors font-medium text-sm sm:text-base text-left px-4 py-2 rounded-lg hover:bg-mimasa-warm/20"
               >
                 Contact
               </button>

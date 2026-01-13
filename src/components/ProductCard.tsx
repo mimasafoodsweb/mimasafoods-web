@@ -50,8 +50,8 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-2xl font-serif font-bold text-mimasa-primary">₹{product.price}</span>
-            <span className="text-mimasa-deep/60 text-sm ml-2 font-medium">{product.weight}</span>
+            <span className="text-xl sm:text-2xl font-serif font-bold text-mimasa-primary">₹{product.price}</span>
+            <span className="text-mimasa-deep/60 text-xs sm:text-sm ml-2 font-medium">{product.weight}</span>
           </div>
 
           <button
@@ -113,17 +113,17 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
                   className={`w-full h-full object-contain ${currentImageIndex === 0 ? 'scale-110 sm:scale-125' : ''}`} 
                 />
               </div>
-              <div className="p-8 w-full max-w-xl mx-auto">
-                <h3 className="text-3xl font-serif font-semibold text-mimasa-deep mb-4">{product.name}</h3>
+              <div className="p-6 sm:p-8 w-full max-w-xl mx-auto">
+                <h3 className="text-2xl sm:text-3xl font-serif font-semibold text-mimasa-deep mb-4">{product.name}</h3>
                 <div className="text-mimasa-deep/80 leading-relaxed mb-6 space-y-4 max-h-[50vh] md:max-h-[60vh] overflow-auto pr-2">
                   {(product.long_description || product.description || '').split('\n').map((para, idx) => (
-                    <p key={idx} className="text-base">{para}</p>
+                    <p key={idx} className="text-sm sm:text-base">{para}</p>
                   ))}
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-3xl font-serif font-bold text-mimasa-primary">₹{product.price}</span>
-                    <span className="text-mimasa-deep/60 text-base ml-3 font-medium">{product.weight}</span>
+                    <span className="text-2xl sm:text-3xl font-serif font-bold text-mimasa-primary">₹{product.price}</span>
+                    <span className="text-mimasa-deep/60 text-sm sm:text-base ml-3 font-medium">{product.weight}</span>
                   </div>
                   <button
                     onClick={() => onAddToCart(product)}
