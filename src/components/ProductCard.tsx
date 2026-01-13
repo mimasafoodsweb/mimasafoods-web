@@ -110,7 +110,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
                 <img 
                   src={images[currentImageIndex]} 
                   alt={product.name} 
-                  className={`w-full h-full object-contain ${currentImageIndex === 0 ? 'scale-110' : ''}`} 
+                  className={`w-full h-full object-contain ${currentImageIndex === 0 ? 'scale-110 sm:scale-125' : ''}`} 
                 />
               </div>
               <div className="p-8 w-full max-w-xl mx-auto">
