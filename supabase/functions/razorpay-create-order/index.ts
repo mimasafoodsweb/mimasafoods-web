@@ -61,8 +61,11 @@ serve(async (req) => {
     }
 
     // Prepare order options for Razorpay (with auto-capture enabled)
+    const amountInPaise = Math.round(Number(amount) * 100) // Ensure integer in paise
+    console.log('Amount conversion:', { original: amount, inPaise: amountInPaise, isInteger: Number.isInteger(amountInPaise) })
+    
     const orderOptions = {
-      amount: amount * 100, // Razorpay expects amount in paise
+      amount: amountInPaise, // Razorpay expects amount in paise (must be integer)
       currency: currency,
       receipt: receipt || `receipt_${Date.now()}`,
       notes: notes || {},

@@ -235,6 +235,15 @@ export class InvoiceGenerator {
         yPosition += 7;
       }
       
+      // Discount line
+      if (orderData.discountAmount && orderData.discountAmount > 0) {
+        pdf.setTextColor(0, 128, 0); // Green color for discount
+        pdf.text('Discount:', margin + 120, yPosition);
+        this.rightAlignText(pdf, `-${orderData.discountAmount.toFixed(2)}`, margin + 180, yPosition);
+        pdf.setTextColor(0, 0, 0); // Reset to black
+        yPosition += 7;
+      }
+      
       // Total line
       pdf.setLineWidth(0.2);
       pdf.line(margin + 115, yPosition, margin + 180, yPosition);
@@ -482,6 +491,15 @@ export class InvoiceGenerator {
       } else {
         pdf.text('Shipping:', margin + 120, yPosition);
         this.rightAlignText(pdf, 'FREE', margin + 180, yPosition);
+        yPosition += 7;
+      }
+      
+      // Discount line
+      if (orderData.discountAmount && orderData.discountAmount > 0) {
+        pdf.setTextColor(0, 128, 0); // Green color for discount
+        pdf.text('Discount:', margin + 120, yPosition);
+        this.rightAlignText(pdf, `-${orderData.discountAmount.toFixed(2)}`, margin + 180, yPosition);
+        pdf.setTextColor(0, 0, 0); // Reset to black
         yPosition += 7;
       }
       

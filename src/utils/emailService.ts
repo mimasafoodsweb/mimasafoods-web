@@ -11,6 +11,7 @@ export interface OrderEmailData {
   items: CartItem[];
   subtotal: number;
   shippingCharge: number;
+  discountAmount?: number;
   totalAmount: number;
   paymentId: string;
   orderDate: string;

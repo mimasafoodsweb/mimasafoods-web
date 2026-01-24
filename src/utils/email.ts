@@ -11,6 +11,7 @@ export interface OrderEmailData {
   items: CartItem[];
   subtotal: number;
   shippingCharge: number;
+  discountAmount?: number;
   totalAmount: number;
   paymentId: string;
   orderDate: string;
@@ -189,6 +190,18 @@ export class EmailService {
                 <tr>
                   <td style="padding: 8px 0;">Shipping Charge:</td>
                   <td style="padding: 8px 0; text-align: right; font-weight: 600;">₹${orderData.shippingCharge.toFixed(2)}</td>
+                </tr>
+              ` : ''}
+              ${orderData.shippingCharge === 0 ? `
+                <tr>
+                  <td style="padding: 8px 0;">Shipping Charge:</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #16a34a;">FREE</td>
+                </tr>
+              ` : ''}
+              ${orderData.discountAmount && orderData.discountAmount > 0 ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #16a34a; font-weight: 600;">Discount:</td>
+                  <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #16a34a;">-₹${orderData.discountAmount.toFixed(2)}</td>
                 </tr>
               ` : ''}
               <tr style="border-top: 2px solid #8B4513;">

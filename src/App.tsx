@@ -4,6 +4,7 @@ import { supabase, isDemoMode, demoProducts } from './lib/supabase';
 import { Product, CartItem } from './types';
 import { getSessionId } from './utils/session';
 import { trackAddToCart, trackBeginCheckout, trackPurchase } from './utils/analytics';
+import { validateDiscountCode, DiscountValidationResult } from './utils/discountService';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import AboutUs from './components/AboutUs';
@@ -24,7 +25,57 @@ function App() {
   const [orderNumber, setOrderNumber] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
+  // Discount state
+  const [discountCode, setDiscountCode] = useState('');
+  const [discountValidation, setDiscountValidation] = useState<DiscountValidationResult | null>(null);
+  const [appliedDiscountId, setAppliedDiscountId] = useState<string | null>(null);
+
   const sessionId = getSessionId();
+
+  // Calculate total amount from cart
+  const getTotalAmount = () => {
+    return cartItems.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0);
+  };
+
+  // Revalidate discount when cart changes
+  useEffect(() => {
+    const revalidateDiscount = async () => {
+      console.log('🔄 Cart changed, revalidating discount...', {
+        discountCode,
+        appliedDiscountId,
+        cartItemsCount: cartItems.length,
+        totalAmount: getTotalAmount()
+      });
+
+      if (discountCode && appliedDiscountId) {
+        const totalAmount = getTotalAmount();
+        try {
+          const result = await validateDiscountCode(discountCode, totalAmount);
+          console.log('📊 Discount validation result:', result);
+          
+          if (!result.valid) {
+            // Discount is no longer valid, clear it completely
+            console.log('❌ Discount no longer valid, clearing...');
+            setDiscountCode('');
+            setDiscountValidation(null);
+            setAppliedDiscountId(null);
+          } else {
+            // Discount is still valid, update the validation result
+            console.log('✅ Discount still valid, updating result');
+            setDiscountValidation(result);
+          }
+        } catch (error) {
+          console.error('❌ Error revalidating discount:', error);
+          // Clear discount on error as well
+          setDiscountCode('');
+          setDiscountValidation(null);
+          setAppliedDiscountId(null);
+        }
+      }
+    };
+
+    revalidateDiscount();
+  }, [cartItems]); // Re-run when cart items change
 
   useEffect(() => {
     fetchProducts();
@@ -182,6 +233,11 @@ function App() {
     setOrderNumber(orderNumber);
     setIsOrderSuccessOpen(true);
     
+    // Clear discount after successful payment
+    setDiscountCode('');
+    setDiscountValidation(null);
+    setAppliedDiscountId(null);
+    
     // Track purchase event - note: this would ideally be called with the actual cart data before clearing
     // For now, we'll track the order completion
     trackPurchase(orderNumber, 0, []); // This should be enhanced with actual order data
@@ -193,6 +249,19 @@ function App() {
   const handleCloseOrderSuccess = () => {
     setIsOrderSuccessOpen(false);
     setOrderNumber('');
+  };
+
+  // Discount handlers
+  const handleSetDiscountCode = (code: string) => {
+    setDiscountCode(code);
+  };
+
+  const handleSetDiscountValidation = (validation: DiscountValidationResult | null) => {
+    setDiscountValidation(validation);
+  };
+
+  const handleSetAppliedDiscountId = (id: string | null) => {
+    setAppliedDiscountId(id);
   };
 
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -238,6 +307,12 @@ function App() {
                 cartItems={cartItems}
                 isSubmitting={false}
                 onPaymentSuccess={handlePaymentSuccess}
+                discountCode={discountCode}
+                discountValidation={discountValidation}
+                appliedDiscountId={appliedDiscountId}
+                onSetDiscountCode={handleSetDiscountCode}
+                onSetDiscountValidation={handleSetDiscountValidation}
+                onSetAppliedDiscountId={handleSetAppliedDiscountId}
               />
 
               <OrderSuccess

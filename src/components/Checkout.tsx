@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, CreditCard, Loader2 } from 'lucide-react';
+import { X, CreditCard, Loader2, Tag, CheckCircle, XCircle } from 'lucide-react';
 import { CartItem } from '../types';
 import { getProductImageUrl } from '../utils/images';
 import { createRazorpayOrder, verifyPayment, saveOrder } from '../utils/api';
@@ -7,6 +7,7 @@ import { PaymentVerificationData } from '../utils/razorpay';
 import { getSessionId } from '../utils/session';
 import { EmailService, OrderEmailData } from '../utils/emailService';
 import { getShippingCharge, getFreeShippingThreshold } from '../utils/cartConfig';
+import { validateDiscountCode, incrementDiscountUsage, DiscountValidationResult } from '../utils/discountService';
 
 interface CheckoutProps {
   isOpen: boolean;
@@ -14,6 +15,12 @@ interface CheckoutProps {
   cartItems: CartItem[];
   isSubmitting: boolean;
   onPaymentSuccess: (orderNumber: string) => void;
+  discountCode?: string;
+  discountValidation?: DiscountValidationResult | null;
+  appliedDiscountId?: string | null;
+  onSetDiscountCode?: (code: string) => void;
+  onSetDiscountValidation?: (validation: DiscountValidationResult | null) => void;
+  onSetAppliedDiscountId?: (id: string | null) => void;
 }
 
 export interface OrderData {
@@ -30,6 +37,12 @@ export default function Checkout({
   cartItems,
   isSubmitting,
   onPaymentSuccess,
+  discountCode = '',
+  discountValidation = null,
+  appliedDiscountId = null,
+  onSetDiscountCode,
+  onSetDiscountValidation,
+  onSetAppliedDiscountId,
 }: CheckoutProps) {
   const [formData, setFormData] = useState<OrderData>({
     customer_name: '',
@@ -41,9 +54,23 @@ export default function Checkout({
 
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
 
   const [shippingCharge, setShippingCharge] = useState(0);
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(500);
+
+  // Sync discount state with props when they change
+  useEffect(() => {
+    if (discountCode !== undefined) {
+      // Input field will use the prop value directly
+    }
+  }, [discountCode]);
+
+  useEffect(() => {
+    if (discountValidation !== undefined) {
+      // Validation will use the prop value directly
+    }
+  }, [discountValidation]);
 
   // Calculate total amount
   const totalAmount = cartItems.reduce(
@@ -73,9 +100,45 @@ export default function Checkout({
     fetchShippingConfig();
   }, []);
 
-  // Calculate final amount with dynamic shipping and threshold
+  // Calculate final amount with dynamic shipping and discount
+  const discountAmount = discountValidation?.valid ? discountValidation.discount_amount : 0;
   const finalShippingCharge = totalAmount < freeShippingThreshold ? shippingCharge : 0;
-  const finalAmount = totalAmount + finalShippingCharge;
+  const finalAmount = totalAmount + finalShippingCharge - discountAmount;
+
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) return;
+
+    setIsApplyingDiscount(true);
+    onSetDiscountValidation?.(null);
+
+    try {
+      const result = await validateDiscountCode(discountCode.trim(), totalAmount);
+      onSetDiscountValidation?.(result);
+
+      if (result.valid) {
+        onSetAppliedDiscountId?.(result.discount_id);
+      } else {
+        onSetAppliedDiscountId?.(null);
+      }
+    } catch (error) {
+      console.error('Error applying discount:', error);
+      onSetDiscountValidation?.({
+        valid: false,
+        discount_amount: 0,
+        message: 'Error validating discount code',
+        discount_id: null
+      });
+      onSetAppliedDiscountId?.(null);
+    } finally {
+      setIsApplyingDiscount(false);
+    }
+  };
+
+  const handleRemoveDiscount = () => {
+    onSetDiscountCode?.('');
+    onSetDiscountValidation?.(null);
+    onSetAppliedDiscountId?.(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +151,7 @@ export default function Checkout({
       // Step 2: Create Razorpay order
       const receipt = `order_${Date.now()}`;
       const orderRequest = {
-        amount: finalAmount, // Use final amount including shipping
+        amount: finalAmount, // Use final amount including shipping and discount
         currency: 'INR',
         receipt,
         notes: {
@@ -99,7 +162,11 @@ export default function Checkout({
           pin_code: formData.pin_code,
           subtotal: totalAmount,
           shipping_charge: finalShippingCharge,
-          total_amount: finalAmount
+          discount_amount: discountAmount,
+          original_amount: totalAmount + finalShippingCharge,
+          total_amount: finalAmount,
+          discount_code: discountValidation?.valid ? discountCode : null,
+          discount_code_id: appliedDiscountId
         }
       };
       
@@ -179,6 +246,9 @@ export default function Checkout({
               items: cartItems,
               created_at: new Date().toISOString(),
               shippingCharge: finalShippingCharge, // Add dynamic shipping charge
+              discountAmount: discountAmount, // Add discount amount
+              originalAmount: totalAmount + finalShippingCharge, // Add original amount
+              discountCodeId: appliedDiscountId, // Add discount code ID
               sessionId: getSessionId() // Add session ID for cart clearing
             };
             
@@ -186,6 +256,11 @@ export default function Checkout({
             
             if (!saveResult.success) {
               throw new Error(saveResult.error || 'Failed to save order');
+            }
+
+            // Increment discount usage count if discount was applied
+            if (appliedDiscountId) {
+              await incrementDiscountUsage(appliedDiscountId);
             }
 
             // Send order confirmation email
@@ -199,6 +274,7 @@ export default function Checkout({
               items: cartItems,
               subtotal: totalAmount,
               shippingCharge: finalShippingCharge,
+              discountAmount: discountAmount,
               totalAmount: finalAmount,
               paymentId: response.razorpay_payment_id,
               orderDate: new Date().toISOString()
@@ -308,9 +384,15 @@ export default function Checkout({
                       <span>₹{finalShippingCharge.toFixed(2)}</span>
                     </div>
                   )}
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-600">Discount</span>
+                      <span className="text-green-600">-₹{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold text-lg pt-2 border-t">
                     <span>Total</span>
-                    <span className="text-[mimasa-primary]">₹{finalAmount.toFixed(2)}</span>
+                    <span className="text-blue-600">₹{finalAmount.toFixed(2)}</span>
                   </div>
                   {finalShippingCharge > 0 && (
                     <div className="text-xs text-gray-500 text-center mt-2">
@@ -322,7 +404,98 @@ export default function Checkout({
                       🎉 Free shipping applied!
                     </div>
                   )}
+                  {discountAmount > 0 && (
+                    <div className="text-xs text-green-600 text-center mt-2 font-medium">
+                      🎉 Discount applied! You saved ₹{discountAmount.toFixed(2)}
+                    </div>
+                  )}
                 </div>
+              </div>
+            </div>
+
+            {/* Discount Code Section */}
+            <div className="mb-8">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Discount Code
+              </h3>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <div className="flex gap-2">
+                  <div className="flex-1 relative">
+                    <Tag className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={discountCode}
+                      onChange={(e) => onSetDiscountCode?.(e.target.value.toUpperCase())}
+                      placeholder="Enter discount code"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 outline-none transition-all"
+                      disabled={isApplyingDiscount || discountValidation?.valid}
+                    />
+                  </div>
+                  {!discountValidation?.valid ? (
+                    <button
+                      type="button"
+                      onClick={handleApplyDiscount}
+                      disabled={!discountCode.trim() || isApplyingDiscount}
+                      className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isApplyingDiscount ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Applying...
+                        </>
+                      ) : (
+                        'Apply'
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleRemoveDiscount}
+                      className="px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-all flex items-center gap-2"
+                    >
+                      <X className="w-4 h-4" />
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                {/* Discount Validation Result */}
+                {discountValidation && (
+                  <div className={`mt-3 p-3 rounded-lg flex items-center gap-2 ${
+                    discountValidation.valid 
+                      ? 'bg-green-50 text-green-700 border border-green-200' 
+                      : 'bg-red-50 text-red-700 border border-red-200'
+                  }`}>
+                    {discountValidation.valid ? (
+                      <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="w-5 h-5 flex-shrink-0" />
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">
+                        {discountValidation.valid ? 'Discount Applied!' : 'Invalid Discount Code'}
+                      </p>
+                      <p className="text-xs mt-1">
+                        {discountValidation.message.includes('Minimum order amount not met') && discountValidation.min_order_amount
+                          ? `${discountValidation.message} (Minimum: ₹${discountValidation.min_order_amount.toFixed(2)})`
+                          : discountValidation.message
+                        }
+                      </p>
+                      {discountValidation.valid && discountValidation.discount_amount > 0 && (
+                        <p className="text-xs mt-1 font-semibold">
+                          You saved ₹{discountValidation.discount_amount.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Minimum Order Amount Info */}
+                {discountValidation?.valid && discountValidation.min_order_amount && discountValidation.min_order_amount > 0 && (
+                  <div className="mt-3 text-xs text-gray-600 bg-blue-50 p-2 rounded">
+                    💡 Minimum order amount: ₹{discountValidation.min_order_amount.toFixed(2)}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -421,7 +594,7 @@ export default function Checkout({
               <button
                 type="submit"
                 disabled={isSubmitting || isProcessingPayment}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-mimasa-accent to-mimasa-primary text-white font-bold rounded-full hover:from-mimasa-primary hover:to-mimasa-accent transition-all shadow-lg hover:shadow-xl border-2 border-mimasa-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-orange-500 to-blue-600 text-white font-bold rounded-full hover:from-orange-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl border-2 border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {isProcessingPayment ? (
                   <>

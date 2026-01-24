@@ -120,6 +120,7 @@ function generateEmailContent(orderData: {
   }>;
   subtotal: number;
   shippingCharge: number;
+  discountAmount?: number;
   totalAmount: number;
 }): string {
   const orderDate = new Date(orderData.orderDate).toLocaleDateString('en-IN', {
@@ -196,6 +197,7 @@ function generateEmailContent(orderData: {
     <div class="total">
       <p>Subtotal: Rs.${orderData.subtotal.toFixed(2)}</p>
       <p>Shipping: ${orderData.shippingCharge > 0 ? `Rs.${orderData.shippingCharge.toFixed(2)}` : 'FREE'}</p>
+      ${orderData.discountAmount && orderData.discountAmount > 0 ? `<p style="color: #16a34a; font-weight: 600;">Discount: -Rs.${orderData.discountAmount.toFixed(2)}</p>` : ''}
       <p><strong>Total Amount: Rs.${orderData.totalAmount.toFixed(2)}</strong></p>
     </div>
 
