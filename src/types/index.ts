@@ -29,6 +29,7 @@ export interface Order {
   pin_code: string;
   subtotal?: number;
   shipping_charge?: number;
+  discount_amount?: number;
   total_amount: number;
   status: string;
   payment_status?: string;

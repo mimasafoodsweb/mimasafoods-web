@@ -139,6 +139,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         paymentId: order.id || '',
         subtotal: order.subtotal || calculatedSubtotal,
         shippingCharge: shippingCharge,
+        discountAmount: order.discount_amount || 0,
         totalAmount: order.total_amount,
         items: currentOrderItems.map(item => ({
           id: item.order_id + '_' + item.product_id, // Create a unique ID
@@ -632,6 +633,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             {selectedOrder.shipping_charge ? `₹${selectedOrder.shipping_charge}` : 'FREE'}
                           </span>
                         </div>
+                        {selectedOrder.discount_amount && selectedOrder.discount_amount > 0 && (
+                          <div className="flex justify-between gap-8">
+                            <span className="text-sm text-green-600 font-medium">Discount:</span>
+                            <span className="text-sm text-green-600 font-medium">-₹{selectedOrder.discount_amount}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between gap-8 pt-2 border-t">
                           <span className="text-lg font-medium text-gray-900">Total:</span>
                           <span className="text-lg font-medium text-gray-900">₹{selectedOrder.total_amount}</span>
