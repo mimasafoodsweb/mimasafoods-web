@@ -43,6 +43,13 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setCurrentOrderPage(1);
   }, [orderPageSize]);
 
+  useEffect(() => {
+    if (selectedOrder) {
+      console.log('🔍 Order Details Modal - selectedOrder:', selectedOrder);
+      console.log('💰 Discount amount:', selectedOrder.discount_amount);
+    }
+  }, [selectedOrder]);
+
   const fetchProducts = async () => {
     try {
       const { data, error } = await supabase
@@ -95,6 +102,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const handleViewOrder = async (order: Order) => {
     setSelectedOrder(order);
+    console.log('🔍 Viewing Order - order data:', order); // Debug log
     await fetchOrderDetails(order.id!);
     setIsOrderModalOpen(true);
   };
@@ -639,6 +647,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             <span className="text-sm text-green-600 font-medium">-₹{selectedOrder.discount_amount}</span>
                           </div>
                         )}
+                        
+                        {/* Debug display - remove after testing */}
+                        <div className="flex justify-between gap-8 text-xs text-gray-500">
+                          <span>Debug - discount_amount:</span>
+                          <span>{selectedOrder.discount_amount || 'null/undefined'}</span>
+                        </div>
                         <div className="flex justify-between gap-8 pt-2 border-t">
                           <span className="text-lg font-medium text-gray-900">Total:</span>
                           <span className="text-lg font-medium text-gray-900">₹{selectedOrder.total_amount}</span>

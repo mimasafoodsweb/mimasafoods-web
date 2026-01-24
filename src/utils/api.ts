@@ -108,6 +108,8 @@ export async function verifyPayment(paymentData: PaymentVerificationData): Promi
 export async function saveOrder(orderData: any & { sessionId?: string }): Promise<{ success: boolean; error?: string; orderNumber?: string }> {
   try {
     console.log('Saving order to Supabase:', orderData);
+    console.log('💰 Discount amount from orderData:', orderData.discountAmount);
+    console.log('🏷️ Discount code ID from orderData:', orderData.discountCodeId);
     
     if (!supabase) {
       throw new Error('Supabase client not initialized');
@@ -120,7 +122,9 @@ export async function saveOrder(orderData: any & { sessionId?: string }): Promis
     );
     // Use the shipping charge from orderData (calculated dynamically in Checkout)
     const shippingCharge = orderData.shippingCharge || 0;
-    const totalAmount = subtotal + shippingCharge;
+    const discountAmount = orderData.discountAmount || 0;
+    const originalAmount = orderData.originalAmount || (subtotal + shippingCharge);
+    const totalAmount = subtotal + shippingCharge - discountAmount;
 
     // Generate order number
     const orderNumber = `MF${Date.now()}`;
@@ -137,6 +141,9 @@ export async function saveOrder(orderData: any & { sessionId?: string }): Promis
         pin_code: orderData.pin_code,
         subtotal: subtotal,
         shipping_charge: shippingCharge,
+        discount_amount: discountAmount,
+        discount_code_id: orderData.discountCodeId || null,
+        original_amount: originalAmount,
         total_amount: totalAmount,
         status: 'paid',
         razorpay_order_id: orderData.order_id,

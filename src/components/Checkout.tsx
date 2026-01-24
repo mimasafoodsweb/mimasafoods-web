@@ -260,7 +260,9 @@ export default function Checkout({
 
             // Increment discount usage count if discount was applied
             if (appliedDiscountId) {
-              await incrementDiscountUsage(appliedDiscountId);
+              console.log('🏷️ Incrementing usage for discount ID:', appliedDiscountId);
+              const usageResult = await incrementDiscountUsage(appliedDiscountId);
+              console.log('📈 Usage increment result:', usageResult);
             }
 
             // Send order confirmation email
