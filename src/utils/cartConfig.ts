@@ -80,6 +80,41 @@ export async function getAllCartConfigs(): Promise<CartConfig[]> {
 }
 
 /**
+ * Get configuration value from cart_config table
+ */
+export async function getConfigSetting(name: string): Promise<string | null> {
+  try {
+    if (!supabase) {
+      console.error('Supabase client not initialized');
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from('cart_config')
+      .select('value')
+      .eq('name', name)
+      .single();
+
+    if (error) {
+      console.error(`Error fetching config setting '${name}':`, error);
+      return null;
+    }
+
+    return data?.value || null;
+  } catch (error) {
+    console.error(`Error fetching config setting '${name}':`, error);
+    return null;
+  }
+}
+
+/**
+ * Get offer banner text from config settings
+ */
+export async function getOfferBanner(): Promise<string | null> {
+  return await getConfigSetting('offer_banner');
+}
+
+/**
  * Update cart configuration value (admin function)
  */
 export async function updateCartConfig(name: string, value: string): Promise<boolean> {

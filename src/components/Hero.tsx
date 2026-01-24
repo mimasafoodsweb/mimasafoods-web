@@ -2,7 +2,7 @@ import ReadyCook from '../assets/ready-cook.png';
 import Wording from '../assets/wording.png';
 import TenMin from '../assets/10-min-text.png';
 import { useState, useEffect } from 'react';
-import { getFreeShippingThreshold } from '../utils/cartConfig';
+import { getFreeShippingThreshold, getOfferBanner } from '../utils/cartConfig';
 
 export default function Hero() {
   // Load all product images from assets (excluding BACK images)
@@ -17,20 +17,25 @@ export default function Hero() {
 
   // State for free shipping threshold
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(500);
+  const [offerBanner, setOfferBanner] = useState<string | null>(null);
 
-  // Fetch free shipping threshold from cart config
+  // Fetch free shipping threshold and offer banner from cart config
   useEffect(() => {
-    const fetchFreeShippingThreshold = async () => {
+    const fetchConfigurations = async () => {
       try {
-        const threshold = await getFreeShippingThreshold();
+        const [threshold, banner] = await Promise.all([
+          getFreeShippingThreshold(),
+          getOfferBanner()
+        ]);
         setFreeShippingThreshold(threshold);
+        setOfferBanner(banner);
       } catch (error) {
-        console.error('Error fetching free shipping threshold:', error);
+        console.error('Error fetching configurations:', error);
         setFreeShippingThreshold(500); // Fallback to 500 if error
       }
     };
 
-    fetchFreeShippingThreshold();
+    fetchConfigurations();
   }, []);
 
   // Animation config (horizontal). Adjust for mobile responsiveness
@@ -62,11 +67,20 @@ export default function Hero() {
                 
                 {/* Right section: Free delivery badge - full width on mobile */}
                 <div className="w-full sm:w-auto flex justify-center">
-                  <div className="bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-4 sm:px-6 py-2 rounded-full font-serif font-semibold text-xs sm:text-sm shadow-large hover:shadow-xl transition-all duration-300 text-center">
+                  <div className="bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-4 sm:px-6 py-2 rounded-full font-serif font-semibold text-sm sm:text-base shadow-large hover:shadow-xl transition-all duration-300 text-center animate-pulse">
                     Free Delivery on Orders Above ₹{freeShippingThreshold}
                   </div>
                 </div>
               </div>
+              
+              {/* Offer Banner - Display if available */}
+              {offerBanner && (
+                <div className="w-full flex justify-center mt-2">
+                  <div className="bg-gradient-to-r from-orange-400 to-green-500 text-white px-4 sm:px-6 py-2 rounded-full font-serif font-semibold text-sm sm:text-base shadow-large hover:shadow-xl transition-all duration-300 text-center">
+                    {offerBanner}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
