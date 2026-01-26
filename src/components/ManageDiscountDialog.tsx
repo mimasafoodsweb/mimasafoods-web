@@ -243,50 +243,51 @@ export default function ManageDiscountDialog({ isOpen, onClose, discount, onSave
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {formData.discount_type === 'percentage' ? 'Maximum Discount Amount' : 'Usage Limit'}
+                Maximum Discount Amount
               </label>
               <div className="relative">
-                {formData.discount_type === 'percentage' ? (
-                  <>
-                    <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                    <input
-                      type="number"
-                      name="max_discount_amount"
-                      value={formData.max_discount_amount}
-                      onChange={handleChange}
-                      min="0"
-                      step="0.01"
-                      placeholder="No limit"
-                      className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mimasa-primary"
-                    />
-                  </>
-                ) : (
-                  <input
-                    type="number"
-                    name="usage_limit"
-                    value={formData.usage_limit}
-                    onChange={handleChange}
-                    min="0"
-                    placeholder="No limit"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mimasa-primary"
-                  />
-                )}
+                <span className="absolute left-3 top-2 text-gray-500">₹</span>
+                <input
+                  type="number"
+                  name="max_discount_amount"
+                  value={formData.max_discount_amount}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  placeholder="No limit"
+                  className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mimasa-primary"
+                />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Expiry Date
+                Usage Limit
               </label>
               <input
-                type="date"
-                name="expires_at"
-                value={formData.expires_at}
+                type="number"
+                name="usage_limit"
+                value={formData.usage_limit}
                 onChange={handleChange}
-                min={new Date().toISOString().split('T')[0]}
+                min="0"
+                placeholder="No limit"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mimasa-primary"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Expiry Date
+            </label>
+            <input
+              type="date"
+              name="expires_at"
+              value={formData.expires_at}
+              onChange={handleChange}
+              min={new Date().toISOString().split('T')[0]}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mimasa-primary"
+            />
           </div>
 
           <div className="flex items-center">
