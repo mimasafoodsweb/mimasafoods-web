@@ -102,7 +102,9 @@ export default function Checkout({
 
   // Calculate final amount with dynamic shipping and discount
   const discountAmount = discountValidation?.valid ? discountValidation.discount_amount : 0;
-  const finalShippingCharge = totalAmount < freeShippingThreshold ? shippingCharge : 0;
+  // Free shipping is judged on the amount AFTER discount (items total - discount)
+  const amountAfterDiscount = totalAmount - discountAmount;
+  const finalShippingCharge = amountAfterDiscount < freeShippingThreshold ? shippingCharge : 0;
   const finalAmount = totalAmount + finalShippingCharge - discountAmount;
 
   const handleApplyDiscount = async () => {
@@ -398,7 +400,7 @@ export default function Checkout({
                   </div>
                   {finalShippingCharge > 0 && (
                     <div className="text-xs text-gray-500 text-center mt-2">
-                      Add ₹{(freeShippingThreshold - totalAmount).toFixed(2)} more for free shipping!
+                      Add ₹{(freeShippingThreshold - amountAfterDiscount).toFixed(2)} more for free shipping!
                     </div>
                   )}
                   {finalShippingCharge === 0 && totalAmount > 0 && (

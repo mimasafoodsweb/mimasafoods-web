@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
+import { getFreeShippingThreshold } from '../utils/cartConfig';
 import { CartItem } from '../types';
 import { getProductImageUrl } from '../utils/images';
 
@@ -25,6 +27,11 @@ export default function Cart({
   );
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(500);
+  useEffect(() => {
+    getFreeShippingThreshold().then(setFreeShippingThreshold).catch(() => {});
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -124,7 +131,7 @@ export default function Cart({
                 <span>Items ({totalItems})</span>
                 <span>₹{totalAmount.toFixed(2)}</span>
               </div>
-              {totalAmount >= 500 && (
+              {totalAmount >= freeShippingThreshold && (
                 <div className="text-green-600 text-sm font-semibold bg-green-50 p-2 rounded-lg text-center">
                   🎉 You qualify for FREE delivery!
                 </div>
