@@ -96,7 +96,7 @@ Please note that custom offers, bundled promotions, or certain perishable items 
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-heritage-footer-divider flex flex-col sm:flex-row justify-between items-center gap-2 text-sm">
+        <div className="mt-12 pt-6 pb-14 sm:pb-0 sm:pr-24 border-t border-heritage-footer-divider flex flex-col sm:flex-row justify-between items-center gap-2 text-sm">
           <p>&copy; {new Date().getFullYear()} Mimasa Foods Pvt. Ltd. All rights reserved.</p>
           <p>
             Powered by <a href="https://www.futurefocusit.solutions" target="_blank" rel="noopener noreferrer" className="text-heritage-gold-light hover:underline">Future Focus IT Solutions</a>
