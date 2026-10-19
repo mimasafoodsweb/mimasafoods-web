@@ -9,6 +9,9 @@ export interface Product {
   weight: string;
   stock_quantity: number;
   is_active: boolean;
+  diet?: 'veg' | 'nonveg' | 'both';
+  name_devanagari?: string | null;
+  preparation_method?: string[] | null;
 }
 
 export interface CartItem {
@@ -43,4 +46,27 @@ export interface OrderItem {
   product_price: number;
   quantity: number;
   subtotal: number;
+}
+
+export interface Review {
+  id: string;
+  product_id: string | null;
+  name: string;
+  rating: number;
+  text: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  product?: { name: string } | null;
+}
+
+export interface Enquiry {
+  id: string;
+  business_line: string;
+  name: string;
+  company: string;
+  phone: string;
+  email: string;
+  city: string;
+  message: string | null;
+  created_at: string;
 }

@@ -4,6 +4,28 @@ export default {
   theme: {
     extend: {
       colors: {
+        heritage: {
+          ink: '#2B170E',
+          copper: '#8E3F1A',
+          gold: '#B98A2E',
+          'gold-light': '#D9B26A',
+          eyebrow: '#9A7424',
+          paper: '#FAF4E8',
+          'paper-2': '#F2E6D2',
+          'paper-3': '#F5EBDA',
+          card: '#FFFDF8',
+          line: '#E3D3BA',
+          'line-2': '#E6D7BF',
+          'input-border': '#D8C3A0',
+          body: '#4E3B2E',
+          muted: '#5A4636',
+          soft: '#7A6352',
+          'footer-text': '#E9DCC6',
+          'footer-divider': '#4A3426',
+          veg: '#2E7D32',
+          nonveg: '#8B1A1A',
+          whatsapp: '#25A35A',
+        },
         mimasa: {
           primary: '#8B4513', // Rich saddle brown - premium and earthy
           secondary: '#DAA520', // Golden rod - warm and appetizing
@@ -15,6 +37,9 @@ export default {
         }
       },
       fontFamily: {
+        display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        body: ['Mukta', 'system-ui', 'sans-serif'],
+        deva: ['"Tiro Devanagari Hindi"', 'serif'],
         serif: ['Playfair Display', 'serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
@@ -46,6 +71,7 @@ export default {
         'soft': '0 2px 15px rgba(0, 0, 0, 0.08)',
         'medium': '0 4px 25px rgba(0, 0, 0, 0.12)',
         'large': '0 8px 40px rgba(0, 0, 0, 0.16)',
+        'heritage-card': '0 18px 40px rgba(43, 23, 14, 0.12)',
       },
     },
   },

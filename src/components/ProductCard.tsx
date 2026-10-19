@@ -1,7 +1,8 @@
-import { ShoppingCart, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Product } from '../types';
 import { getProductImageUrl } from '../utils/images';
+import { CATEGORY_SINGULAR, DietMark, dietKinds, PouchImage } from './heritage/ui';
 
 interface ProductCardProps {
   product: Product;
@@ -11,126 +12,174 @@ interface ProductCardProps {
 export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
-  const resolvedImg = getProductImageUrl(product.name.toUpperCase()) || product.image_url;
-  const backImage = getProductImageUrl(`${product.name.toUpperCase()} BACK`) || product.image_url;
+
+  const assetFront = getProductImageUrl(product.name.toUpperCase());
+  const assetBack = getProductImageUrl(`${product.name.toUpperCase()} BACK`);
+  const resolvedImg = assetFront || product.image_url;
+  const backImage = assetBack || product.image_url;
   const images = [resolvedImg, backImage].filter(Boolean);
-  
+  const kinds = dietKinds(product.diet);
+  const categoryLabel = CATEGORY_SINGULAR[product.category] || product.category;
+
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
-  
+
   const handleNextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
-  return (
-    <div className="bg-white rounded-3xl shadow-soft hover:shadow-large transition-all duration-300 overflow-hidden group border border-mimasa-cream/50">
-      <div className="relative overflow-hidden h-56">
-        <img
-          src={resolvedImg}
-          alt={product.name}
-          className="w-full h-full object-cover scale-125 group-hover:scale-130 transition-transform duration-500 cursor-pointer"
-          onClick={() => setIsModalOpen(true)}
-        />
-        {product.category === 'marinade' && (
-          <div className="absolute top-4 right-4 bg-gradient-to-r from-mimasa-secondary to-mimasa-primary text-white px-4 py-2 rounded-full text-sm font-serif font-semibold shadow-medium">
-            Marinade
-          </div>
-        )}
-      </div>
 
-      <div className="px-6 pt-3 pb-3">
-        <h3 className="text-xl font-serif font-semibold text-mimasa-deep mb-1 line-clamp-2 min-h-[3.5rem] leading-tight">
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsModalOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isModalOpen]);
+
+  const steps = (product.preparation_method || []).filter((s) => s && s.trim());
+  const DEVA_NUM = ['१', '२', '३', '४', '५', '६', '७', '८', '९'];
+
+  // Front pouch images are oversized transparent PNGs, so they need the crop; other URLs render as-is
+  const renderWell = (src: string | undefined, cropped: boolean, alt: string, widthPct: number, top = 52) =>
+    cropped ? (
+      <PouchImage src={src} alt={alt} widthPct={widthPct} top={top} />
+    ) : (
+      <img src={src} alt={alt} className="absolute inset-0 w-full h-full object-contain" />
+    );
+
+  return (
+    <div className="h-full">
+    <div className="h-card bg-heritage-card border border-heritage-line-2 rounded-md overflow-hidden group h-full flex flex-col">
+      <button
+        type="button"
+        onClick={() => setIsModalOpen(true)}
+        aria-label={`View ${product.name}`}
+        className="relative m-2 md:m-3.5 aspect-[1/1.05] bg-heritage-paper-2 rounded-t-full rounded-b-[4px] overflow-hidden block"
+      >
+        {renderWell(resolvedImg, !!assetFront, product.name, 205)}
+        {product.category === 'marinade' && (
+          <span className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-heritage-ink text-heritage-paper text-xs tracking-[0.14em] uppercase px-3 py-1 rounded-full">
+            Marinade
+          </span>
+        )}
+      </button>
+
+      <div className="px-3 md:px-5 pt-1 md:pt-[18px] pb-3 md:pb-5 flex flex-col flex-1">
+        <div className="flex items-center justify-between gap-2 min-h-[20px]">
+          <span className="font-deva text-base text-heritage-copper truncate">{product.name_devanagari || ''}</span>
+          <span className="flex items-center gap-1 flex-none">
+            {kinds.map((k) => <DietMark key={k} kind={k} size={14} />)}
+          </span>
+        </div>
+        <h3 className="font-display font-semibold text-heritage-ink text-lg leading-[1.1] md:text-[25px] md:min-h-[56px] mt-1">
           {product.name}
         </h3>
+        <p className="text-sm text-heritage-soft mt-1">{categoryLabel} · {product.weight}</p>
 
-        <p className="text-mimasa-deep/70 text-sm mb-1 line-clamp-2 min-h-[2.5rem] leading-relaxed">
-          {product.category}
-        </p>
-
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xl sm:text-2xl font-serif font-bold text-mimasa-primary">₹{product.price}</span>
-            <span className="text-mimasa-deep/60 text-xs sm:text-sm ml-2 font-medium">{product.weight}</span>
-          </div>
-
+        <div className="flex items-center justify-between mt-auto pt-3">
+          <span className="font-display font-bold text-heritage-ink text-xl md:text-[28px]">₹{product.price}</span>
           <button
             onClick={() => onAddToCart(product)}
-            className="bg-gradient-to-r from-mimasa-accent to-mimasa-primary text-white font-semibold px-5 py-2.5 rounded-full hover:from-mimasa-primary hover:to-mimasa-accent transition-all duration-300 flex items-center space-x-2 shadow-medium hover:shadow-large text-sm"
+            aria-label={`Add ${product.name} to cart`}
+            className="md:px-5 md:py-2 w-11 h-11 md:w-auto md:h-auto rounded-full border-[1.5px] border-heritage-copper text-heritage-copper font-semibold text-sm hover:bg-heritage-copper hover:text-heritage-paper transition-colors flex items-center justify-center"
           >
-            <span>Add</span>
-            <ShoppingCart className="w-4 h-4" />
+            <span className="md:hidden text-xl leading-none">+</span>
+            <span className="hidden md:inline">Add to cart</span>
           </button>
         </div>
       </div>
+    </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-mimasa-deep/70 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white rounded-3xl shadow-large max-w-5xl w-[94%] md:w-[1000px] overflow-hidden border border-mimasa-cream">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3" role="dialog" aria-modal="true" aria-label={product.name}>
+          <div className="absolute inset-0 bg-[#5B4636]/85" onClick={() => setIsModalOpen(false)} />
+          <div className="relative bg-heritage-paper rounded-lg w-full max-w-[1000px] max-h-[94vh] overflow-auto">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 p-3 rounded-full bg-white/90 hover:bg-white shadow-medium hover:shadow-large transition-all duration-200 z-10"
+              className="absolute top-4 right-4 w-11 h-11 rounded-full border border-heritage-line bg-heritage-paper flex items-center justify-center z-10 hover:bg-heritage-paper-2"
               aria-label="Close"
             >
-              <X className="w-5 h-5 text-mimasa-deep" />
+              <X className="w-5 h-5 text-heritage-ink" />
             </button>
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="relative bg-gradient-to-br from-mimasa-cream to-mimasa-warm/30 h-[40vh] md:h-[45vh]">
+            <div className="grid md:grid-cols-2">
+              {/* Image side */}
+              <div className="bg-heritage-paper-2 p-5 md:p-7">
+                <div className="relative bg-heritage-copper overflow-hidden h-[340px] md:h-[470px] rounded-t-[160px] md:rounded-t-[240px] rounded-b-[4px]">
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevImage}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-heritage-paper/90 hover:bg-heritage-paper flex items-center justify-center z-10"
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft className="w-4 h-4 text-heritage-ink" />
+                      </button>
+                      <button
+                        onClick={handleNextImage}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-heritage-paper/90 hover:bg-heritage-paper flex items-center justify-center z-10"
+                        aria-label="Next image"
+                      >
+                        <ChevronRight className="w-4 h-4 text-heritage-ink" />
+                      </button>
+                    </>
+                  )}
+                  {currentImageIndex === 0 ? (
+                    renderWell(images[0], !!assetFront, product.name, 260)
+                  ) : (
+                    <img src={images[currentImageIndex]} alt={`${product.name} back`} className="absolute left-1/2 top-1/2 h-[96%] -translate-x-1/2 -translate-y-1/2" />
+                  )}
+                </div>
                 {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={handlePrevImage}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white shadow-medium hover:shadow-large transition-all duration-200 z-10"
-                      aria-label="Previous image"
-                    >
-                      <ChevronLeft className="w-4 h-4 text-mimasa-deep" />
-                    </button>
-                    <button
-                      onClick={handleNextImage}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 hover:bg-white shadow-medium hover:shadow-large transition-all duration-200 z-10"
-                      aria-label="Next image"
-                    >
-                      <ChevronRight className="w-4 h-4 text-mimasa-deep" />
-                    </button>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-                      {images.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                            index === currentImageIndex ? 'bg-mimasa-primary w-6' : 'bg-white/60'
-                          }`}
-                          aria-label={`Go to image ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  </>
+                  <div className="flex justify-center gap-3 mt-4">
+                    {images.map((src, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`relative w-16 h-16 rounded overflow-hidden bg-heritage-paper border-2 ${index === currentImageIndex ? 'border-heritage-copper' : 'border-heritage-line'}`}
+                        aria-label={`Go to image ${index + 1}`}
+                      >
+                        {index === 0 ? renderWell(src, !!assetFront, '', 260) : <img src={src} alt="" className="absolute inset-0 w-full h-full object-contain" />}
+                      </button>
+                    ))}
+                  </div>
                 )}
-                <img 
-                  src={images[currentImageIndex]} 
-                  alt={product.name} 
-                  className={`w-full h-full object-contain ${currentImageIndex === 0 ? 'scale-110 sm:scale-125' : ''}`} 
-                />
               </div>
-              <div className="p-6 sm:p-8 w-full max-w-xl mx-auto">
-                <h3 className="text-2xl sm:text-3xl font-serif font-semibold text-mimasa-deep mb-4">{product.name}</h3>
-                <div className="text-mimasa-deep/80 leading-relaxed mb-6 space-y-4 max-h-[50vh] md:max-h-[60vh] overflow-auto pr-2">
+
+              {/* Details side */}
+              <div className="p-6 md:p-11 flex flex-col gap-3.5">
+                <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: kinds.length === 1 && kinds[0] === 'nonveg' ? '#8B1A1A' : '#2E7D32' }}>
+                  {kinds.map((k) => <DietMark key={k} kind={k} size={16} />)}
+                  <span>{kinds.length === 2 ? 'Veg / Non-veg' : kinds[0] === 'veg' ? 'Veg' : 'Non-veg'} · {categoryLabel} · {product.weight}</span>
+                </div>
+                {product.name_devanagari && <div className="font-deva text-[22px] text-heritage-copper">{product.name_devanagari}</div>}
+                <h3 className="font-display font-semibold text-heritage-ink text-[34px] md:text-[44px] leading-[1.05]">{product.name}</h3>
+                <div className="text-heritage-body space-y-3 max-h-[26vh] overflow-auto pr-1">
                   {(product.long_description || product.description || '').split('\n').map((para, idx) => (
-                    <p key={idx} className="text-sm sm:text-base">{para}</p>
+                    <p key={idx} className="text-base leading-relaxed">{para}</p>
                   ))}
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-2xl sm:text-3xl font-serif font-bold text-mimasa-primary">₹{product.price}</span>
-                    <span className="text-mimasa-deep/60 text-sm sm:text-base ml-3 font-medium">{product.weight}</span>
+
+                {steps.length > 0 && (
+                  <div className="border-t border-heritage-line pt-4">
+                    <div className="text-[13px] font-semibold tracking-[0.16em] uppercase text-heritage-gold mb-3">Method of preparation</div>
+                    <ol className="space-y-3">
+                      {steps.map((st, i) => (
+                        <li key={i} className="flex gap-4 text-sm text-heritage-body">
+                          <span className="font-deva text-[17px] text-heritage-gold w-4 flex-none">{DEVA_NUM[i] || i + 1}</span>
+                          <span>{st}</span>
+                        </li>
+                      ))}
+                    </ol>
                   </div>
+                )}
+
+                <div className="flex items-center justify-between mt-auto pt-4">
+                  <span className="font-display font-bold text-heritage-ink text-[32px] md:text-[38px]">₹{product.price}</span>
                   <button
                     onClick={() => onAddToCart(product)}
-                    className="bg-gradient-to-r from-mimasa-accent to-mimasa-primary text-white font-semibold px-6 py-3 rounded-full hover:from-mimasa-primary hover:to-mimasa-accent transition-all duration-300 flex items-center space-x-2 text-base shadow-medium hover:shadow-large"
+                    className="bg-heritage-copper text-heritage-paper font-semibold rounded-full px-[34px] py-[15px] hover:bg-heritage-ink transition-colors"
                   >
-                    <span>Add</span>
-                    <ShoppingCart className="w-5 h-5" />
+                    Add to cart
                   </button>
                 </div>
               </div>

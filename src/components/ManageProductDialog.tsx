@@ -20,7 +20,10 @@ export default function ManageProductDialog({ isOpen, onClose, product, onSave }
     category: '',
     weight: '',
     stock_quantity: 0,
-    is_active: true
+    is_active: true,
+    diet: 'veg',
+    name_devanagari: '',
+    preparation_steps_text: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,6 +31,8 @@ export default function ManageProductDialog({ isOpen, onClose, product, onSave }
   // Category options
   const categories = [
     { value: 'gravy', label: 'Gravy' },
+    { value: 'paste', label: 'Curry Paste' },
+    { value: 'mix', label: 'Instant Mix' },
     { value: 'marinade', label: 'Marinade' },
     { value: 'powder', label: 'Powder' }
   ];
@@ -43,7 +48,10 @@ export default function ManageProductDialog({ isOpen, onClose, product, onSave }
         category: product.category,
         weight: product.weight,
         stock_quantity: product.stock_quantity,
-        is_active: product.is_active
+        is_active: product.is_active,
+        diet: product.diet || 'veg',
+        name_devanagari: product.name_devanagari || '',
+        preparation_steps_text: (product.preparation_method || []).join('\n')
       });
     } else {
       setFormData({
@@ -55,7 +63,10 @@ export default function ManageProductDialog({ isOpen, onClose, product, onSave }
         category: '',
         weight: '',
         stock_quantity: 0,
-        is_active: true
+        is_active: true,
+        diet: 'veg',
+        name_devanagari: '',
+        preparation_steps_text: ''
       });
     }
     setError('');
@@ -98,8 +109,12 @@ export default function ManageProductDialog({ isOpen, onClose, product, onSave }
         category: formData.category,
         weight: formData.weight,
         stock_quantity: formData.stock_quantity,
-        is_active: formData.is_active
+        is_active: formData.is_active,
+        diet: formData.diet,
+        name_devanagari: formData.name_devanagari.trim() || null,
+        preparation_method: formData.preparation_steps_text.split('\n').map(l => l.trim()).filter(Boolean)
       };
+      if (submitData.preparation_method.length === 0) (submitData as any).preparation_method = null;
 
       console.log('Submitting data to database:', submitData);
 
@@ -241,6 +256,44 @@ export default function ManageProductDialog({ isOpen, onClose, product, onSave }
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mimasa-primary focus:border-transparent outline-none"
                 placeholder="Detailed product description..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Diet</label>
+              <select
+                name="diet"
+                value={formData.diet}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mimasa-primary focus:border-transparent outline-none"
+              >
+                <option value="veg">Veg</option>
+                <option value="nonveg">Non-veg</option>
+                <option value="both">Both (veg and non-veg)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Name in Devanagari (optional)</label>
+              <input
+                type="text"
+                name="name_devanagari"
+                value={formData.name_devanagari}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mimasa-primary focus:border-transparent outline-none"
+                placeholder="e.g. पनीर बटर"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Method of preparation (optional, one step per line)</label>
+              <textarea
+                name="preparation_steps_text"
+                value={formData.preparation_steps_text}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mimasa-primary focus:border-transparent outline-none"
+                placeholder={"Add 2 to 3 tbsp butter in a pan...\nAdd 300 gms of soft Paneer Cube..."}
               />
             </div>
 

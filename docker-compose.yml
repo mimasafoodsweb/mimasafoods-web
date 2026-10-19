@@ -1,0 +1,26 @@
+# Local dev: web app in Docker, talking to local Supabase (see local-supabase/).
+# Start DB first:  cd local-supabase && supabase start --workdir . -x logflare,vector,edge-runtime
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./index.html:/app/index.html
+      - ./tailwind.config.js:/app/tailwind.config.js
+    # Razorpay (TEST keys) and Brevo keys come from the git-ignored .env.local.
+    # `environment:` below wins over this file, so Supabase always points at the local stack.
+    env_file:
+      - path: .env.local
+        required: false
+    environment:
+      # Browser-side URL of the local Supabase API (published on the host)
+      VITE_SUPABASE_URL: http://127.0.0.1:55321
+      VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+      # Keep analytics off locally (overrides anything in .env.local)
+      VITE_GA_MEASUREMENT_ID: ""
+      CHOKIDAR_USEPOLLING: "true"
