@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Mukta:wght@400;500;600;700&family=Tiro+Devanagari+Hindi&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -13,4 +14,23 @@
     font-family: 'Playfair Display', serif;
     font-weight: 600;
   }
+}
+
+/* Heritage storefront theme: scoped so the admin panel keeps its existing look */
+.heritage {
+  font-family: 'Mukta', system-ui, sans-serif;
+  background: #FAF4E8;
+  color: #2B170E;
+}
+.heritage h1, .heritage h2, .heritage h3, .heritage h4, .heritage h5, .heritage h6 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+}
+.heritage .no-scrollbar { scrollbar-width: none; }
+.heritage .no-scrollbar::-webkit-scrollbar { display: none; }
+.heritage .h-card { transition: transform 250ms ease, box-shadow 250ms ease; }
+.heritage .h-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(43, 23, 14, 0.12); }
+@media (prefers-reduced-motion: reduce) {
+  .heritage .h-card { transition: none; }
+  .heritage .h-card:hover { transform: none; }
 }

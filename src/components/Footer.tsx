@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import PolicyModal from './PolicyModal';
+import SocialLinks from './heritage/SocialLinks';
+import { SiteConfig } from '../utils/siteConfig';
 
-export default function Footer() {
+export default function Footer({ siteConfig }: { siteConfig: SiteConfig }) {
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const policies = {
@@ -39,26 +41,35 @@ Please note that custom offers, bundled promotions, or certain perishable items 
     setActiveModal(null);
   };
 
+  const linkCls = 'block text-heritage-footer-text hover:text-heritage-gold-light transition-colors text-left';
+  const scrollTo = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <footer className="bg-mimasa-deep text-white py-16 mt-24" id="contact">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+    <footer className="bg-heritage-ink text-heritage-footer-text scroll-mt-24" id="contact">
+      {/* Copper band */}
+      <div className="h-[3px] bg-heritage-copper" />
+      <div className="h-[2px] bg-heritage-ink" />
+      <div className="h-px bg-heritage-gold" />
+
+      <div className="max-w-[1240px] mx-auto px-5 pt-14 md:pt-[72px] pb-8">
+        <div className="grid md:grid-cols-[1.3fr_1fr_1fr] gap-10 md:gap-14">
           <div>
-            <h3 className="text-3xl font-serif font-semibold mb-6 text-mimasa-secondary">Mimasa Foods Pvt. Ltd.</h3>
-            <p className="text-mimasa-cream leading-relaxed">
-              Homemade Delicacy - Best Ready to Cook Gravy/Curry Paste
-            </p>
-            <p className="text-mimasa-cream leading-relaxed mt-2">
-              FSSAI License No: 11525080000418
-            </p>
-            <p className="text-mimasa-cream leading-relaxed mt-2">
-              GSTIN: 27AAPCM6971L1ZK
-            </p>
+            <h3 className="font-display text-[28px] md:text-[32px] font-semibold text-heritage-gold-light mb-5">Mimasa Foods Pvt. Ltd.</h3>
+            <p className="leading-relaxed">Homemade Delicacy - Best Ready to Cook Gravy/Curry Paste</p>
+            <p className="leading-relaxed mt-2 text-[13px] md:text-[15px] text-[#B7A48A] md:text-heritage-footer-text">FSSAI License No: 11525080000418</p>
+            <p className="leading-relaxed mt-1 text-[13px] md:text-[15px] text-[#B7A48A] md:text-heritage-footer-text">GSTIN: 27AAPCM6971L1ZK</p>
+            <div className="mt-6">
+              <p className="text-[13px] font-semibold tracking-[0.14em] uppercase text-heritage-gold-light mb-3">Follow us</p>
+              <SocialLinks config={siteConfig} variant="footer" />
+            </div>
           </div>
 
           <div>
-            <h4 className="text-xl font-serif font-semibold mb-6 text-mimasa-warm">Contact Us</h4>
-            <div className="space-y-3 text-mimasa-cream">
+            <h4 className="font-display text-xl font-semibold text-heritage-gold-light mb-5">Contact Us</h4>
+            <div className="space-y-1.5 text-[15px]">
               <p>Mimasa Foods Pvt Ltd</p>
               <p>Plot no 3, Kshitij,</p>
               <p>Sanjwat CHS,669/2,</p>
@@ -70,55 +81,29 @@ Please note that custom offers, bundled promotions, or certain perishable items 
           </div>
 
           <div>
-            <h4 className="text-xl font-serif font-semibold mb-6 text-mimasa-warm">Quick Links</h4>
-            <div className="space-y-3">
-              <a href="#products" className="block text-mimasa-cream hover:text-mimasa-secondary transition-colors font-medium">
-                Products
-              </a>
-              <a href="#about" className="block text-mimasa-cream hover:text-mimasa-secondary transition-colors font-medium">
-                About Us
-              </a>
-              <a href="#contact" className="block text-mimasa-cream hover:text-mimasa-secondary transition-colors font-medium">
-                Contact
-              </a>
-              <button 
-                onClick={() => openModal('privacy')}
-                className="block text-mimasa-cream hover:text-mimasa-secondary transition-colors font-medium text-left"
-              >
-                Privacy Policy
-              </button>
-              <button 
-                onClick={() => openModal('terms')}
-                className="block text-mimasa-cream hover:text-mimasa-secondary transition-colors font-medium text-left"
-              >
-                Terms and Conditions
-              </button>
-              <button 
-                onClick={() => openModal('shipping')}
-                className="block text-mimasa-cream hover:text-mimasa-secondary transition-colors font-medium text-left"
-              >
-                Shipping Policy
-              </button>
-              <button 
-                onClick={() => openModal('refunds')}
-                className="block text-mimasa-cream hover:text-mimasa-secondary transition-colors font-medium text-left"
-              >
-                Cancellations and Refunds
-              </button>
+            <h4 className="font-display text-xl font-semibold text-heritage-gold-light mb-5">Quick Links</h4>
+            <div className="space-y-2.5 text-[15px]">
+              <a href="#products" onClick={scrollTo('products')} className={linkCls}>Products</a>
+              <a href="#reviews" onClick={scrollTo('reviews')} className={linkCls}>Reviews</a>
+              <a href="#enquiry" onClick={scrollTo('enquiry')} className={linkCls}>Enquiry</a>
+              <a href="#about-us" onClick={scrollTo('about-us')} className={linkCls}>About Us</a>
+              <a href="#contact" onClick={scrollTo('contact')} className={linkCls}>Contact</a>
+              <button onClick={() => openModal('privacy')} className={linkCls}>Privacy Policy</button>
+              <button onClick={() => openModal('terms')} className={linkCls}>Terms and Conditions</button>
+              <button onClick={() => openModal('shipping')} className={linkCls}>Shipping Policy</button>
+              <button onClick={() => openModal('refunds')} className={linkCls}>Cancellations and Refunds</button>
             </div>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-mimasa-primary/30 text-mimasa-cream">
-          <div className="flex flex-col sm:flex-row justify-between items-center">
-            <p className="font-medium">&copy; {new Date().getFullYear()} Mimasa Foods Pvt. Ltd. All rights reserved.</p>
-            <p className="font-medium mt-4 sm:mt-0">
-              Powered by <a href="https://www.futurefocusit.solutions" target="_blank" rel="noopener noreferrer" className="text-mimasa-secondary hover:text-mimasa-warm transition-colors">Future Focus IT Solutions</a>
-            </p>
-          </div>
+        <div className="mt-12 pt-6 border-t border-heritage-footer-divider flex flex-col sm:flex-row justify-between items-center gap-2 text-sm">
+          <p>&copy; {new Date().getFullYear()} Mimasa Foods Pvt. Ltd. All rights reserved.</p>
+          <p>
+            Powered by <a href="https://www.futurefocusit.solutions" target="_blank" rel="noopener noreferrer" className="text-heritage-gold-light hover:underline">Future Focus IT Solutions</a>
+          </p>
         </div>
       </div>
-      
+
       {/* Policy Modals */}
       {Object.entries(policies).map(([key, policy]) => (
         <PolicyModal

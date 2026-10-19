@@ -1,8 +1,10 @@
 import ManageProductDialog from './ManageProductDialog';
 import CartConfigSettings from './CartConfigSettings';
 import DiscountManagement from './DiscountManagement';
+import ReviewsManagement from './ReviewsManagement';
+import EnquiriesManagement from './EnquiriesManagement';
 import { useState, useEffect } from 'react';
-import { Package, ShoppingCart, BarChart3, LogOut, Menu, X, Edit, Power, PowerOff, Plus, Eye, Download, Settings, Tag } from 'lucide-react';
+import { Package, ShoppingCart, BarChart3, LogOut, Menu, X, Edit, Power, PowerOff, Plus, Eye, Download, Settings, Tag, Star, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Product, Order, OrderItem } from '../types';
 import { InvoiceGenerator } from '../utils/invoiceGenerator';
@@ -269,6 +271,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     { id: 'products', label: 'Products', icon: Package },
     { id: 'orders', label: 'Orders', icon: ShoppingCart },
     { id: 'discounts', label: 'Discounts', icon: Tag },
+    { id: 'reviews', label: 'Reviews', icon: Star },
+    { id: 'enquiries', label: 'Enquiries', icon: Mail },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -667,6 +671,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         );
       case 'discounts':
         return <DiscountManagement />;
+      case 'reviews':
+        return <ReviewsManagement />;
+      case 'enquiries':
+        return <EnquiriesManagement />;
       case 'reports':
         return (
           <div className="space-y-6">

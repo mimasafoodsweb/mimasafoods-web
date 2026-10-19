@@ -35,116 +35,131 @@ export default function Cart({
 
   if (!isOpen) return null;
 
+  const progress = freeShippingThreshold > 0 ? Math.min(100, (totalAmount / freeShippingThreshold) * 100) : 100;
+  const qualifies = totalAmount >= freeShippingThreshold;
+
   return (
     <>
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-50"
+        className="fixed inset-0 bg-[#5B4636]/85 z-50"
         onClick={onClose}
       />
 
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b">
-          <div className="flex items-center space-x-2">
-            <ShoppingBag className="w-6 h-6 text-[mimasa-primary]" />
-            <h2 className="text-2xl font-bold text-gray-900">Your Cart</h2>
-          </div>
+      <div className="heritage fixed right-0 top-0 h-full w-full max-w-md bg-heritage-paper shadow-2xl z-50 flex flex-col">
+        <div className="flex items-center justify-between px-6 h-[92px] border-b border-heritage-line flex-none">
+          <h2 className="font-display text-[32px] font-semibold text-heritage-ink">
+            Your Cart <span className="font-body text-base font-normal text-heritage-soft">({totalItems})</span>
+          </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="w-11 h-11 rounded-full border border-heritage-line flex items-center justify-center hover:bg-heritage-paper-2 transition-colors"
+            aria-label="Close cart"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 text-heritage-ink" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        {cartItems.length > 0 && (
+          <div className="bg-heritage-paper-3 border-b border-heritage-line px-6 py-4 flex-none">
+            <p className={`text-sm font-semibold mb-2 ${qualifies ? 'text-heritage-veg' : 'text-heritage-copper'}`}>
+              {qualifies
+                ? 'You qualify for FREE delivery!'
+                : `Add ₹${(freeShippingThreshold - totalAmount).toFixed(2)} more for FREE delivery`}
+            </p>
+            <div className="h-1.5 rounded-full bg-heritage-line-2 overflow-hidden" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
+              <div className="h-full rounded-full bg-heritage-copper transition-all duration-300" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto px-6">
           {cartItems.length === 0 ? (
             <div className="text-center py-16">
-              <ShoppingBag className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500 text-lg">Your cart is empty</p>
+              <ShoppingBag className="w-16 h-16 mx-auto text-heritage-line mb-4" />
+              <p className="text-heritage-muted text-lg">Your cart is empty</p>
               <button
                 onClick={onClose}
-                className="mt-4 text-[mimasa-primary] hover:text-[mimasa-deep] font-semibold"
+                className="mt-4 text-heritage-copper hover:text-heritage-ink font-semibold underline"
               >
                 Continue Shopping
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-4 p-4 bg-gray-50 rounded-xl"
-                >
-                  <img
-                    src={item.product?.name ? getProductImageUrl(item.product.name.toUpperCase()) || item.product?.image_url : item.product?.image_url}
-                    alt={item.product?.name}
-                    className="w-24 h-24 object-cover rounded-lg scale-105 transition-transform"
-                  />
+            <div className="divide-y divide-heritage-line">
+              {cartItems.map((item) => {
+                const assetImg = item.product?.name ? getProductImageUrl(item.product.name.toUpperCase()) : undefined;
+                const img = assetImg || item.product?.image_url;
+                return (
+                  <div key={item.id} className="flex gap-4 py-5">
+                    <div className="relative w-[84px] h-24 flex-none bg-heritage-paper-2 rounded-t-[42px] rounded-b-[3px] overflow-hidden">
+                      {assetImg ? (
+                        <img src={img} alt={item.product?.name} className="absolute left-1/2 top-[52%] w-[250%] max-w-none -translate-x-1/2 -translate-y-1/2" />
+                      ) : (
+                        <img src={img} alt={item.product?.name} className="w-full h-full object-cover" />
+                      )}
+                    </div>
 
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      {item.product?.name}
-                    </h3>
-                    <p className="text-[mimasa-primary] font-bold">
-                      ₹{item.product?.price}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-display text-[21px] font-semibold text-heritage-ink leading-tight">
+                        {item.product?.name}
+                      </h3>
+                      <p className="text-[13px] text-heritage-soft mt-1">
+                        {item.product?.weight} · ₹{item.product?.price}
+                      </p>
 
-                    <div className="flex items-center space-x-3 mt-2">
-                      <button
-                        onClick={() =>
-                          onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
-                        }
-                        className="p-1 bg-white rounded-full hover:bg-gray-200 transition-colors"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-4 mt-3">
+                        <div className="inline-flex items-center h-9 rounded-full border border-heritage-input-border">
+                          <button
+                            onClick={() =>
+                              onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
+                            }
+                            className="w-9 h-9 flex items-center justify-center hover:text-heritage-copper"
+                            aria-label="Decrease quantity"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-7 text-center font-semibold text-sm">{item.quantity}</span>
+                          <button
+                            onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                            className="w-9 h-9 flex items-center justify-center hover:text-heritage-copper"
+                            aria-label="Increase quantity"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
 
-                      <span className="font-semibold w-8 text-center">
-                        {item.quantity}
-                      </span>
-
-                      <button
-                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                        className="p-1 bg-white rounded-full hover:bg-gray-200 transition-colors"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        onClick={() => onRemoveItem(item.id)}
-                        className="ml-auto text-red-500 hover:text-red-700 text-sm font-medium"
-                      >
-                        Remove
-                      </button>
+                        <button
+                          onClick={() => onRemoveItem(item.id)}
+                          className="text-heritage-nonveg underline text-sm font-medium min-h-[44px]"
+                        >
+                          Remove
+                        </button>
+                        <span className="ml-auto font-display text-xl font-bold text-heritage-ink">
+                          ₹{((item.product?.price || 0) * item.quantity).toFixed(0)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
 
         {cartItems.length > 0 && (
-          <div className="border-t p-6 bg-gray-50">
-            <div className="space-y-3 mb-6">
-              <div className="flex justify-between text-gray-600">
-                <span>Items ({totalItems})</span>
-                <span>₹{totalAmount.toFixed(2)}</span>
-              </div>
-              {totalAmount >= freeShippingThreshold && (
-                <div className="text-green-600 text-sm font-semibold bg-green-50 p-2 rounded-lg text-center">
-                  🎉 You qualify for FREE delivery!
-                </div>
-              )}
-              <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t">
-                <span>Total</span>
-                <span>₹{totalAmount.toFixed(2)}</span>
-              </div>
+          <div className="border-t border-heritage-line bg-heritage-card px-6 pt-5 pb-6 flex-none">
+            <div className="flex justify-between text-heritage-muted pb-4 border-b border-heritage-line">
+              <span>Items ({totalItems})</span>
+              <span>₹{totalAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-baseline py-4">
+              <span className="font-display text-2xl font-semibold text-heritage-ink">Total</span>
+              <span className="font-display text-[30px] font-bold text-heritage-ink">₹{totalAmount.toFixed(2)}</span>
             </div>
 
             <button
               onClick={onCheckout}
-              className="w-full bg-gradient-to-r from-mimasa-accent to-mimasa-primary text-white font-bold py-4 rounded-full hover:from-mimasa-primary hover:to-mimasa-accent transition-all duration-300 shadow-lg hover:shadow-xl border-2 border-mimasa-accent"
+              className="w-full h-[54px] rounded-full bg-heritage-copper text-heritage-paper font-semibold hover:bg-heritage-ink transition-colors"
             >
               Proceed to Checkout
             </button>

@@ -15,6 +15,10 @@ import OrderSuccess from './components/OrderSuccess';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
 import AnalyticsTracker from './components/AnalyticsTracker';
+import ReviewsSection from './components/ReviewsSection';
+import EnquirySection from './components/EnquirySection';
+import WhatsAppButton from './components/WhatsAppButton';
+import { useSiteConfig } from './utils/siteConfig';
 
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -29,6 +33,8 @@ function App() {
   const [discountCode, setDiscountCode] = useState('');
   const [discountValidation, setDiscountValidation] = useState<DiscountValidationResult | null>(null);
   const [appliedDiscountId, setAppliedDiscountId] = useState<string | null>(null);
+
+  const siteConfig = useSiteConfig();
 
   const sessionId = getSessionId();
 
@@ -285,12 +291,15 @@ function App() {
         <Route
           path="/*"
           element={
-            <div className="min-h-screen bg-mimasa-cream">
-              <Header cartItemCount={cartItemCount} onCartClick={() => setIsCartOpen(true)} />
+            <div className="heritage min-h-screen">
+              <Header cartItemCount={cartItemCount} onCartClick={() => setIsCartOpen(true)} siteConfig={siteConfig} />
               <Hero />
               <ProductGrid products={products} onAddToCart={handleAddToCart} />
+              <ReviewsSection products={products} />
               <AboutUs />
-              <Footer />
+              <EnquirySection config={siteConfig} />
+              <Footer siteConfig={siteConfig} />
+              <WhatsAppButton number={siteConfig.whatsapp} hidden={isCartOpen || isCheckoutOpen} />
 
               <Cart
                 isOpen={isCartOpen}
